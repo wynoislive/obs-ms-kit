@@ -550,20 +550,28 @@ void OBSBasicSettings::AddServer(QFormLayout *outputsLayout, obs_data_t *setting
 	platformIconLabel->setPixmap(platformIcon.pixmap(36, 36));
 	server_title_layout->addWidget(platformIconLabel, 0);
 
-	auto streaming_title = new QLabel(QString::fromUtf8(obs_data_get_string(settings, "name")));
-	streaming_title->setStyleSheet(QString::fromUtf8("font-weight: bold;"));
+	const bool expanded = obs_data_get_bool(settings, "expanded");
+
+	auto streaming_title = new QToolButton;
+	streaming_title->setText(QString::fromUtf8(obs_data_get_string(settings, "name")));
+	streaming_title->setStyleSheet(QString("QToolButton{background-color: %1;font-weight: bold;border: none;}")
+					       .arg(palette().color(QPalette::ColorRole::Mid).name(QColor::HexRgb)));
+	streaming_title->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	streaming_title->setArrowType(expanded ? Qt::ArrowType::DownArrow : Qt::ArrowType::RightArrow);
+	streaming_title->setCheckable(true);
+	streaming_title->setChecked(expanded);
 	server_title_layout->addWidget(streaming_title, 1, Qt::AlignLeft);
 
 	// Advanced settings
 	const bool advanced = obs_data_get_bool(settings, "advanced");
-	auto advancedGroup = new QGroupBox(QString::fromUtf8(obs_module_text("AdvancedGroupHeader")));
+	auto advancedGroup = new QGroupBox;
 	advancedGroup->setContentsMargins(0, 4, 0, 0);
 
 	advancedGroup->setProperty("customTitle", QVariant(true));
 	advancedGroup->setStyleSheet(
 		"QGroupBox[customTitle=\"true\"]::title { subcontrol-origin: margin; subcontrol-position: top right; padding: 12px 18px 0 0; }"
 		"QGroupBox[customTitle=\"true\"] { padding-top: 4px; padding-bottom: 0;}");
-	if (!advanced)
+	if (!expanded)
 		advancedGroup->setVisible(false);
 
 	auto advancedGroupLayout = new QVBoxLayout;
@@ -901,21 +909,32 @@ void OBSBasicSettings::AddServer(QFormLayout *outputsLayout, obs_data_t *setting
 		audioEncoder->setCurrentIndex(-1);
 	audioEncoder->setCurrentIndex(audio_encoder_index);
 
-	auto advancedButton = new QPushButton(QString::fromUtf8(obs_module_text("EditEncoderSettings")));
-	advancedButton->setProperty("themeID", "configIconSmall");
-	advancedButton->setProperty("class", "icon-gear");
+	auto advancedButton = new QCheckBox(QString::fromUtf8(obs_module_text("EditEncoderSettings")));
 	advancedButton->setCheckable(true);
 	advancedButton->setChecked(advanced);
-	connect(advancedButton, &QPushButton::clicked, [advancedButton, advancedGroup, settings] {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+	connect(advancedButton, &QCheckBox::checkStateChanged, [advancedButton, advancedTabWidget, settings] {
+#else
+	connect(advancedButton, &QCheckBox::stateChanged, [advancedButton, advancedTabWidget, settings] {
+#endif
 		const bool is_advanced = advancedButton->isChecked();
-		advancedGroup->setVisible(is_advanced);
+		advancedTabWidget->setVisible(is_advanced);
 		obs_data_set_bool(settings, "advanced", is_advanced);
+	});
+
+	advancedGroupLayout->addWidget(advancedButton);
+
+	connect(streaming_title, &QToolButton::toggled, [advancedGroup, streaming_title, settings](bool checked) {
+		advancedGroup->setVisible(checked);
+		obs_data_set_bool(settings, "expanded", checked);
+		streaming_title->setArrowType(checked ? Qt::ArrowType::DownArrow : Qt::ArrowType::RightArrow);
 	});
 
 	// Hook up
 	advancedTabWidget->addTab(videoPage, QString::fromUtf8(obs_module_text("VideoEncoderSettings")));
 	advancedTabWidget->addTab(audioPage, QString::fromUtf8(obs_module_text("AudioEncoderSettings")));
 	advancedGroupLayout->addWidget(advancedTabWidget, 1);
+	advancedTabWidget->setVisible(advanced);
 
 	// Remove button
 	auto removeButton =
@@ -980,7 +999,6 @@ void OBSBasicSettings::AddServer(QFormLayout *outputsLayout, obs_data_t *setting
 
 	// Buttons to layout
 	server_title_layout->addWidget(editButton, 0, Qt::AlignRight);
-	server_title_layout->addWidget(advancedButton, 0, Qt::AlignRight);
 	server_title_layout->addWidget(removeButton, 0, Qt::AlignRight);
 
 	serverLayout->addRow(server_title_layout);

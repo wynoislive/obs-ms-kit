@@ -49,8 +49,15 @@ bool obs_module_load(void)
 	multistream_dock = new MultistreamDock(main_window);
 	obs_frontend_add_dock_by_id("AitumMultistreamDock", obs_module_text("AitumMultistream"), multistream_dock);
 
-	version_update_info = update_info_create_single("[Aitum Multistream]", "OBS", "https://api.aitum.tv/plugin/multi",
-							version_info_downloaded, nullptr);
+	std::string url = "https://api.aitum.tv/plugin/multi";
+	const char *pguid = config_get_string(obs_frontend_get_app_config(), "General", "InstallGUID");
+	if (pguid) {
+		url += "?uuid=";
+		url += pguid;
+	}
+
+	version_update_info =
+		update_info_create_single("[Aitum Multistream]", "OBS", url.c_str(), version_info_downloaded, nullptr);
 	return true;
 }
 
@@ -70,7 +77,6 @@ void obs_module_unload()
 		delete multistream_dock;
 	}
 }
-
 
 const char *obs_module_name(void)
 {
