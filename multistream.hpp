@@ -39,6 +39,7 @@ private:
 	std::vector<std::tuple<std::string, obs_output_t *, QPushButton *>> outputs;
 	obs_data_array_t *vertical_outputs = nullptr;
 	bool exiting = false;
+	bool finished_loading = false;
 
 	void LoadSettingsFile();
 	void LoadSettings();
@@ -50,6 +51,8 @@ private:
 	void outputButtonStyle(QPushButton *button);
 
 	void storeMainStreamEncoders();
+
+	void AskUpdate();
 
 	QIcon streamActiveIcon = QIcon(":/aitum/media/streaming.svg");
 	QIcon streamInactiveIcon = QIcon(":/aitum/media/stream.svg");

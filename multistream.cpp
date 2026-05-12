@@ -492,7 +492,12 @@ MultistreamDock::~MultistreamDock()
 void MultistreamDock::frontend_event(enum obs_frontend_event event, void *private_data)
 {
 	auto md = (MultistreamDock *)private_data;
-	if (event == OBS_FRONTEND_EVENT_PROFILE_CHANGED || event == OBS_FRONTEND_EVENT_FINISHED_LOADING) {
+	if (event == OBS_FRONTEND_EVENT_FINISHED_LOADING) {
+		md->finished_loading = true;
+		md->LoadSettingsFile();
+		if (!md->newer_version_available.isEmpty())
+			md->AskUpdate();
+	}else if (event == OBS_FRONTEND_EVENT_PROFILE_CHANGED) {
 		md->LoadSettingsFile();
 	} else if (event == OBS_FRONTEND_EVENT_PROFILE_CHANGING || event == OBS_FRONTEND_EVENT_PROFILE_RENAMED) {
 		md->SaveSettings();
@@ -1090,6 +1095,8 @@ void MultistreamDock::ApiInfo(QString info)
 		if (sv > MAKE_SEMANTIC_VERSION(PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH)) {
 			newer_version_available = QString::fromUtf8(version);
 			configButton->setStyleSheet(QString::fromUtf8("background: rgb(192,128,0);"));
+			if (finished_loading)
+				AskUpdate();
 		}
 	}
 	time_t current_time = time(nullptr);
@@ -1222,6 +1229,59 @@ void MultistreamDock::storeMainStreamEncoders()
 		}
 	}
 	obs_output_release(output);
+}
+
+void MultistreamDock::AskUpdate() {
+	auto parts = newer_version_available.split(".");
+	if (parts.count() < 3)
+		return;
+	int major = parts.value(0).toInt();
+	int minor = parts.value(1).toInt();
+	int patch = parts.value(2).toInt();
+	auto sv = MAKE_SEMANTIC_VERSION(major, minor, patch);
+
+
+	char *path = obs_module_config_path("config.json");
+	if (!path)
+		return;
+	
+	obs_data_t *config = obs_data_create_from_json_file_safe(path, "bak");
+	
+
+
+	auto skip_version = config ? obs_data_get_int(config, "skip_version") : 0;
+	if (sv == skip_version) {
+		obs_data_release(config);
+		bfree(path);
+		return;
+	}
+
+	auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
+
+	QMessageBox mb(QMessageBox::Question, QString::fromUtf8(obs_frontend_get_locale_string("Updater.Title")),
+		       QString::fromUtf8(obs_frontend_get_locale_string("Updater.Text")) + " " +
+			       QString::fromUtf8(obs_module_text("AitumMultistream")) + " " + newer_version_available,
+		       QMessageBox::StandardButtons(), main_window);
+	auto update = mb.addButton(QString::fromUtf8(obs_frontend_get_locale_string("Updater.UpdateNow")), QMessageBox::YesRole);
+	auto remind =
+		mb.addButton(QString::fromUtf8(obs_frontend_get_locale_string("Updater.RemindMeLater")), QMessageBox::RejectRole);
+	auto skip = mb.addButton(QString::fromUtf8(obs_frontend_get_locale_string("Updater.Skip")), QMessageBox::NoRole);
+	mb.setDefaultButton(remind);
+	mb.exec();
+	if (mb.clickedButton() == update) {
+		QDesktopServices::openUrl(QUrl(QString::fromUtf8("https://aitum.tv/download/multi/")));
+	} else if (mb.clickedButton() == skip) {
+		if (!config)
+			config = obs_data_create();
+		obs_data_set_int(config, "skip_version", sv);
+		if (obs_data_save_json_safe(config, path, "tmp", "bak")) {
+			blog(LOG_INFO, "[Aitum Multistream] Saved settings");
+		} else {
+			blog(LOG_ERROR, "[Aitum Multistream] Failed saving settings");
+		}
+	}
+	obs_data_release(config);
+	bfree(path);
 }
 
 AspectRatioPixmapLabel::AspectRatioPixmapLabel(QWidget *parent) : QLabel(parent)
