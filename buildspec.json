@@ -1,0 +1,48 @@
+{
+    "dependencies": {
+        "obs-studio": {
+            "version": "31.0.0-fix1",
+            "baseUrl": "https://github.com/exeldro/obs-studio/archive/refs/tags",
+            "label": "OBS sources",
+            "hashes": {
+                "macos": "cd1eb62a9f9583fb028d3fb71523fc235b5f7c334793dc3f85baae10147e2c30",
+                "windows-x64": "1cc1cd66a10a7c2e8963c17fc8de4d706daa77f1013c2ed532b117fc689f8e01"
+            }
+        },
+        "prebuilt": {
+            "version": "2024-09-12",
+            "baseUrl": "https://github.com/obsproject/obs-deps/releases/download",
+            "label": "Pre-Built obs-deps",
+            "hashes": {
+                "macos": "c857b211ee378772994b632036e1e5befe66b37e85286cb8e3cefc1435d5220a",
+                "windows-x64": "d4a4f194591766891ad3c0b267deec3c4b85239c8fe557273559927456aeedbb"
+            }
+        },
+        "qt6": {
+            "version": "2024-09-12",
+            "baseUrl": "https://github.com/obsproject/obs-deps/releases/download",
+            "label": "Pre-Built Qt6",
+            "hashes": {
+                "macos": "34a2de6b7f4d4d58fc5a15a4dba49a61d81a4045d0cedfc1a1f08c0dfb8047cf",
+                "windows-x64": "4d15ce13dbb0a8a2cabcce5ae0da5e80ee589b482a61b2025378465c1da32c4f"
+            },
+            "debugSymbols": {
+                "windows-x64": "dad2351a5c9cd438168e1ed8fb453a2534532252edb555f1001a5e8eb3f1bbd4"
+            }
+        }
+    },
+    "platformConfig": {
+        "macos": {
+            "bundleId": "tv.aitum.multi"
+        }
+    },
+    "name": "aitum-multistream",
+    "displayName": "Aitum Multistream",
+    "version": "1.0.8",
+    "author": "Aitum",
+    "website": "https://aitum.tv",
+    "email": "support@aitum.tv",
+    "uuids": {
+        "windowsApp": "7E8814F2-03EE-4E2E-8062-A9A184EC0618"
+    }
+}
