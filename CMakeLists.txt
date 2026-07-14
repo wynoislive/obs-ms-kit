@@ -61,6 +61,8 @@ set(KERNEL_HEADERS
   runtime/kernel/IScheduler.hpp
   runtime/kernel/IEventDispatcher.hpp
   runtime/kernel/IConfigManager.hpp
+  runtime/kernel/Scheduler.hpp
+  runtime/kernel/KernelContext.hpp
 )
 
 set(ENGINE_HEADERS
@@ -97,6 +99,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/engine/video/Scaler.cpp
   runtime/engine/encoder/EncoderInstance.cpp
   runtime/engine/protocol/RtmpClient.cpp
+  runtime/kernel/Scheduler.cpp
+  runtime/kernel/KernelContext.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
