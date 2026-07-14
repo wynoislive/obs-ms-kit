@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Xcode 16 injects conflicting deployment targets into the compiler wrapper
+unset MACOSX_DEPLOYMENT_TARGET
+unset IPHONEOS_DEPLOYMENT_TARGET
+unset TVOS_DEPLOYMENT_TARGET
+unset WATCHOS_DEPLOYMENT_TARGET
+unset DRIVERKIT_DEPLOYMENT_TARGET
 if [[ "$1" == "${CMAKE_CXX_COMPILER}" ]] ; then
     shift
 fi
