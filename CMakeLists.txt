@@ -69,12 +69,16 @@ set(ENGINE_HEADERS
   runtime/engine/output/IOutputSession.hpp
   runtime/engine/output/OutputController.hpp
   runtime/engine/output/OutputSession.hpp
+  runtime/engine/output/ReconnectPolicy.hpp
+  runtime/engine/output/HealthMonitor.hpp
   runtime/engine/network/NetworkBuffer.hpp
   runtime/engine/video/FrameDistributor.hpp
   runtime/engine/video/IScaler.hpp
   runtime/engine/video/Scaler.hpp
   runtime/engine/encoder/IEncoderInstance.hpp
   runtime/engine/encoder/EncoderInstance.hpp
+  runtime/engine/protocol/IProtocolClient.hpp
+  runtime/engine/protocol/RtmpClient.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -86,10 +90,13 @@ target_sources(${PROJECT_NAME} PRIVATE
   file-updater.c
   runtime/engine/output/OutputSession.cpp
   runtime/engine/output/OutputController.cpp
+  runtime/engine/output/ReconnectPolicy.cpp
+  runtime/engine/output/HealthMonitor.cpp
   runtime/engine/network/NetworkBuffer.cpp
   runtime/engine/video/FrameDistributor.cpp
   runtime/engine/video/Scaler.cpp
   runtime/engine/encoder/EncoderInstance.cpp
+  runtime/engine/protocol/RtmpClient.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
