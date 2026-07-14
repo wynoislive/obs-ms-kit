@@ -1,53 +1,40 @@
 #pragma once
-#include "OutputRegistry.hpp"
-#include <memory>
-#include <shared_mutex>
 
-namespace mskit {
+#include "IOutputSession.hpp"
+#include "../config/OutputProfile.hpp"
+#include <unordered_map>
+#include <shared_mutex>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace mskit::engine {
 
 class OutputController {
 private:
-    std::shared_ptr<OutputRegistry> registry;
-    mutable std::shared_mutex controller_mutex;
+    // Core session registry bucket
+    std::unordered_map<std::string, std::shared_ptr<IOutputSession>> sessions;
+    
+    // Shared mutex to optimize data-plane read-heavy lookups vs control-plane writes
+    mutable std::shared_mutex registry_mutex;
 
 public:
-    explicit OutputController(std::shared_ptr<OutputRegistry> reg) : registry(reg) {}
-    ~OutputController() = default;
+    OutputController() = default;
+    ~OutputController() { GlobalTriggerStop(); }
 
-    // Master Control Plane Orchestrations
-    void StartSession(const std::string& session_id) {
-        std::shared_lock<std::shared_mutex> lock(controller_mutex);
-        if (auto session = registry->FindSession(session_id)) {
-            session->StartPipeline();
-        }
-    }
+    // Control Plane: Node Lifecycle Management
+    bool RegisterSession(const std::string& node_id, std::shared_ptr<IOutputSession> session);
+    bool UnregisterSession(const std::string& node_id);
 
-    void StopSession(const std::string& session_id) {
-        std::shared_lock<std::shared_mutex> lock(controller_mutex);
-        if (auto session = registry->FindSession(session_id)) {
-            session->StopPipeline();
-        }
-    }
+    void GlobalTriggerStart();
+    void GlobalTriggerStop();
 
-    void SwapSessionProfile(const std::string& session_id, const OutputProfile& new_profile) {
-        std::shared_lock<std::shared_mutex> lock(controller_mutex);
-        if (auto session = registry->FindSession(session_id)) {
-            session->SwapProfile(new_profile);
-        }
-    }
+    // Resource Coordination: Invoked by the Performance Rule Engine
+    void EnforceResourceThrottle(uint32_t max_allowed_priority);
 
-    void GlobalTriggerStart() {
-        // TBD: Global start across all registered sessions
-    }
-
-    void GlobalTriggerStop() {
-        // TBD: Global stop across all registered sessions
-    }
-
-    // Resource Coordination Hook for the Rule Engine
-    void ThrottleSessionPriority(uint32_t threshold_priority) {
-        // TBD: Throttling sessions based on priority constraints
-    }
+    // Thread-Safe Accessors
+    std::shared_ptr<IOutputSession> GetSession(const std::string& node_id) const;
+    std::vector<std::shared_ptr<IOutputSession>> GetAllActiveSessions() const;
 };
 
-} // namespace mskit
+} // namespace mskit::engine

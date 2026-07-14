@@ -42,6 +42,7 @@ public:
     virtual mskit::OutputHealth GetHealth() const override { return current_health.load(); }
     virtual mskit::OutputRuntimeState GetRuntimeState() const override;
     virtual const std::string& GetSessionId() const override { return session_id; }
+    virtual uint32_t GetPriorityLevel() const override;
 };
 
 } // namespace mskit::engine

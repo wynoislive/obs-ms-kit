@@ -135,4 +135,9 @@ OutputRuntimeState OutputSession::GetRuntimeState() const {
     return state;
 }
 
+uint32_t OutputSession::GetPriorityLevel() const {
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex));
+    return current_profile.priority_level;
+}
+
 } // namespace mskit::engine
