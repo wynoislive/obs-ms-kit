@@ -77,16 +77,42 @@ bool EncoderInstance::Open(const OutputProfile& profile) {
     // Dynamically pick hardware runtime hooks based on creator config
     std::string target_encoder_id = "obs_x264"; // Default fallback CPU software loop
 
+#if defined(_WIN32)
+    // --- Windows Hardware Selection Matrix ---
     if (profile.encoder_preset == "NVENC") {
-        target_encoder_id = "ffmpeg_nvenc";
+        target_encoder_id = "jim_nvenc";
     } else if (profile.encoder_preset == "QSV") {
         target_encoder_id = "obs_qsv11";
     } else if (profile.encoder_preset == "AMF") {
-        target_encoder_id = "h264_texture_amf";
+        target_encoder_id = "amd_amf_h264";
     }
 
+#elif defined(__APPLE__)
+    // --- macOS Hardware Selection Matrix (Apple Silicon / Intel VT) ---
+    // VideoToolbox handles hardware-accelerated H.264 & HEVC directly on Apple SOCs
+    if (profile.encoder_preset == "NVENC" || profile.encoder_preset == "QSV" || profile.encoder_preset == "AMF") {
+        blog(LOG_WARNING, "[MSK-ENCODER] Windows specific HW codec requested on macOS. Mapping to Apple VideoToolbox.");
+        target_encoder_id = "vt_h264"; 
+    } else if (profile.encoder_preset == "VideoToolbox") {
+        target_encoder_id = "vt_h264";
+    }
+
+#elif defined(__linux__)
+    // --- Linux Hardware Selection Matrix (VAAPI / FFmpeg) ---
+    if (profile.encoder_preset == "NVENC") {
+        target_encoder_id = "jim_nvenc"; // NVENC is fully supported on Linux with proprietary drivers
+    } else if (profile.encoder_preset == "QSV" || profile.encoder_preset == "AMF") {
+        blog(LOG_WARNING, "[MSK-ENCODER] Mapping hardware codec to Linux VAAPI.");
+        target_encoder_id = "obs_vaapi_h264";
+    }
+#endif
+
     if (!BindObsEncoder(target_encoder_id, profile)) {
-        return false;
+        blog(LOG_ERROR, "[MSK-ENCODER] [%s] Failed to create native libobs encoder type: %s. Attempting x264 software fallback.",
+             instance_id.c_str(), target_encoder_id.c_str());
+        if (!BindObsEncoder("obs_x264", profile)) {
+            return false;
+        }
     }
 
     is_initialized = true;

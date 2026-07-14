@@ -46,7 +46,15 @@ void AddDestinationDialog::SetupLayouts() {
     height_spin->setValue(1080);
 
     preset_combo = new QComboBox(this);
+#if defined(_WIN32)
     preset_combo->addItems({"NVENC", "QSV", "AMF", "x264"});
+#elif defined(__APPLE__)
+    preset_combo->addItems({"VideoToolbox", "x264"});
+#elif defined(__linux__)
+    preset_combo->addItems({"NVENC", "VAAPI", "x264"});
+#else
+    preset_combo->addItems({"x264"});
+#endif
 
     // Pack rows into form matrix panels
     form_layout->addRow(tr("Destination Token ID:"), id_input);
