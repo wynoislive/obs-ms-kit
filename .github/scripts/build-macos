@@ -37,6 +37,14 @@ TRAPZERR() {
 }
 
 build() {
+  # Force clear conflicting deployment target environment variables
+  # The runner injects MACOSX_DEPLOYMENT_TARGET which conflicts with
+  # the Xcode attribute set by CMake via cmake/macos/xcode.cmake
+  unset MACOSX_DEPLOYMENT_TARGET
+  unset IPHONEOS_DEPLOYMENT_TARGET
+  unset TVOS_DEPLOYMENT_TARGET
+  unset WATCHOS_DEPLOYMENT_TARGET
+
   if (( ! ${+SCRIPT_HOME} )) typeset -g SCRIPT_HOME=${ZSH_ARGZERO:A:h}
   local host_os='macos'
   local project_root=${SCRIPT_HOME:A:h:h}
@@ -111,8 +119,6 @@ build() {
   }
 
   log_group "Configuring ${product_name}..."
-  # Unset this to prevent conflict with CMake-defined targets
-  unset MACOSX_DEPLOYMENT_TARGET
   cmake -S ${project_root} ${cmake_args}
 
   log_group "Building ${product_name}..."
