@@ -1,6 +1,8 @@
 #pragma once
 #include "IService.hpp"
 #include <functional>
+#include <cstdint>
+
 
 namespace mskit::kernel {
 

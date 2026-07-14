@@ -17,6 +17,11 @@ add_library(${PROJECT_NAME} MODULE)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE OBS::libobs)
 
+if(APPLE)
+    # Explicitly lock down the target deployment version to neutralize environment mismatches
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X Deployment Target" FORCE)
+endif()
+
 # ----------------------------------------------------------------------------
 # Cross-Platform Qt6 and libobs Discovery Hooks (Local Developer Mode Only)
 # ----------------------------------------------------------------------------

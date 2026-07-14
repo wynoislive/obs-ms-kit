@@ -2,6 +2,8 @@
 #include "IService.hpp"
 #include <string>
 #include <functional>
+#include <cstdint>
+
 
 namespace mskit::kernel {
 
