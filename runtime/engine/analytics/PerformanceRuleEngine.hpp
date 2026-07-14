@@ -8,9 +8,14 @@
 #include <string>
 #include <atomic>
 
+namespace mskit::test {
+    class PerformanceRuleTestHarness;
+}
+
 namespace mskit::engine {
 
 class PerformanceRuleEngine : public mskit::kernel::IService {
+    friend class mskit::test::PerformanceRuleTestHarness;
 private:
     std::weak_ptr<OutputController> controller_hook;
     std::atomic<bool> is_running{false};

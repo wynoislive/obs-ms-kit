@@ -6,6 +6,7 @@
 #include "runtime/kernel/KernelContext.hpp"
 #include "runtime/engine/output/OutputController.hpp"
 #include "runtime/ui/CreatorHubWidget.hpp"
+#include "runtime/test/PerformanceRuleTestHarness.hpp"
 #include <QDesktopServices>
 #include <QGroupBox>
 #include <QLabel>
@@ -93,6 +94,13 @@ bool obs_module_load(void)
 
 	version_update_info =
 		update_info_create_single("[Aitum Multistream]", "OBS", url.c_str(), version_info_downloaded, nullptr);
+
+#ifdef _DEBUG
+	// Automatically execute our verification simulation in debug builds
+	mskit::test::PerformanceRuleTestHarness test_suite;
+	test_suite.RunSimulationSuite();
+#endif
+
 	return true;
 }
 

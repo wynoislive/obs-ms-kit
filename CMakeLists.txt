@@ -88,6 +88,8 @@ set(ENGINE_HEADERS
   runtime/engine/analytics/PerformanceRuleEngine.hpp
   runtime/ui/CreatorHubWidget.hpp
   runtime/ui/AddDestinationDialog.hpp
+  runtime/test/MockOutputSession.hpp
+  runtime/test/PerformanceRuleTestHarness.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -115,6 +117,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/engine/analytics/PerformanceRuleEngine.cpp
   runtime/ui/CreatorHubWidget.cpp
   runtime/ui/AddDestinationDialog.cpp
+  runtime/test/PerformanceRuleTestHarness.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
