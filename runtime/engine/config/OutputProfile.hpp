@@ -26,6 +26,7 @@ struct OutputProfile {
     uint32_t audio_track_idx   = 1;
     uint32_t priority_level    = 1;
     StreamProtocol protocol    = StreamProtocol::RTMP;
+    std::string encoder_preset = "x264"; // NVENC | QSV | AMF | x264
 };
 
 } // namespace mskit

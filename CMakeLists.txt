@@ -73,6 +73,8 @@ set(ENGINE_HEADERS
   runtime/engine/video/FrameDistributor.hpp
   runtime/engine/video/IScaler.hpp
   runtime/engine/video/Scaler.hpp
+  runtime/engine/encoder/IEncoderInstance.hpp
+  runtime/engine/encoder/EncoderInstance.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -87,6 +89,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/engine/network/NetworkBuffer.cpp
   runtime/engine/video/FrameDistributor.cpp
   runtime/engine/video/Scaler.cpp
+  runtime/engine/encoder/EncoderInstance.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
