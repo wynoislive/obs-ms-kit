@@ -24,6 +24,7 @@ public:
     virtual OutputRuntimeState GetRuntimeState() const = 0;
     virtual const std::string& GetSessionId() const = 0;
     virtual uint32_t GetPriorityLevel() const = 0;
+    virtual OutputProfile GetProfile() const = 0;
 
     // Data Plane entry point called by FrameDistributor
     virtual void ProcessVideoFrame(obs_source_t* source) = 0;

@@ -64,6 +64,7 @@ set(KERNEL_HEADERS
   runtime/kernel/Scheduler.hpp
   runtime/kernel/KernelContext.hpp
   runtime/kernel/EventDispatcher.hpp
+  runtime/kernel/ConfigManager.hpp
 )
 
 set(ENGINE_HEADERS
@@ -82,6 +83,8 @@ set(ENGINE_HEADERS
   runtime/engine/encoder/EncoderInstance.hpp
   runtime/engine/protocol/IProtocolClient.hpp
   runtime/engine/protocol/RtmpClient.hpp
+  runtime/engine/protocol/SrtClient.hpp
+  runtime/engine/protocol/WhipClient.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -100,9 +103,12 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/engine/video/Scaler.cpp
   runtime/engine/encoder/EncoderInstance.cpp
   runtime/engine/protocol/RtmpClient.cpp
+  runtime/engine/protocol/SrtClient.cpp
+  runtime/engine/protocol/WhipClient.cpp
   runtime/kernel/Scheduler.cpp
   runtime/kernel/KernelContext.cpp
   runtime/kernel/EventDispatcher.cpp
+  runtime/kernel/ConfigManager.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp

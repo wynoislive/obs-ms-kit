@@ -1,6 +1,7 @@
 #include "KernelContext.hpp"
 #include "Scheduler.hpp"
 #include "EventDispatcher.hpp"
+#include "ConfigManager.hpp"
 #include <obs-module.h>
 
 namespace mskit::kernel {
@@ -29,6 +30,10 @@ bool KernelContext::BootKernel() {
     // Register type-safe control event bus
     auto event_bus = std::make_shared<EventDispatcher>();
     service_registry.RegisterService<IEventDispatcher>(event_bus);
+
+    // Register configuration manager
+    auto config_mgr = std::make_shared<ConfigManager>();
+    service_registry.RegisterService<IConfigManager>(config_mgr);
 
     runtime_state = KernelRuntimeState::Ready;
     blog(LOG_INFO, "[MSK-CORE] MS-Kit Platform Kernel Context successfully booted.");

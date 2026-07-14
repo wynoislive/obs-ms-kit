@@ -54,6 +54,7 @@ public:
     virtual mskit::OutputRuntimeState GetRuntimeState() const override;
     virtual const std::string& GetSessionId() const override { return session_id; }
     virtual uint32_t GetPriorityLevel() const override;
+    virtual OutputProfile GetProfile() const override;
 
     // Data Plane entry points
     virtual void ProcessVideoFrame(obs_source_t* source) override;

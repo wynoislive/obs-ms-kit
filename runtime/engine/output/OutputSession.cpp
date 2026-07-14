@@ -276,4 +276,9 @@ void OutputSession::PipelineToBuffer(struct encoder_packet* packet) {
     }
 }
 
+OutputProfile OutputSession::GetProfile() const {
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex));
+    return current_profile;
+}
+
 } // namespace mskit::engine
