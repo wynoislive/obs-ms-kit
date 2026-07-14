@@ -42,8 +42,8 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/obsproject/obs-studio/releases/download/30.1.2/obs-studio-30.1.2-Full-x64.zip" -OutFile deps/obs.zip
           Expand-Archive -Path deps/obs.zip -DestinationPath deps/obs-studio
           
-          # Inject target paths into the GitHub Environment runner space
-          echo "OBS_DEP_PATH=${{ github.workspace }}/deps/obs-studio" >> $env:GITHUB_ENV
+          # Fix: Use explicit UTF-8 piping to avoid PowerShell UTF-16 BOM syntax corruption
+          "OBS_DEP_PATH=${{ github.workspace }}/deps/obs-studio" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       # 4. Configure build paths
       - name: Configure CMake

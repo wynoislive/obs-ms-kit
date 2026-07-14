@@ -18,23 +18,24 @@ add_library(${PROJECT_NAME} MODULE)
 target_link_libraries(${PROJECT_NAME} PRIVATE OBS::libobs)
 
 # ----------------------------------------------------------------------------
-# Cross-Platform Qt6 and libobs Discovery Hooks
+# Cross-Platform Qt6 and libobs Discovery Hooks (Local Developer Mode Only)
 # ----------------------------------------------------------------------------
-
-if(APPLE)
-    # Target Homebrew default installation prefixes for Apple Silicon & Intel macOS
-    list(APPEND CMAKE_PREFIX_PATH 
-        "/opt/homebrew/opt/qt"
-        "/usr/local/opt/qt"
-        "/opt/homebrew"
-    )
-    # Enable automatic bundle configurations for macOS targets
-    set(CMAKE_MACOSX_RPATH ON)
-    
-elseif(UNIX AND NOT APPLE)
-    # Force system paths for standard Linux distros
-    list(APPEND CMAKE_PREFIX_PATH "/usr/lib/x86_64-linux-gnu/cmake")
+if(NOT DEFINED ENV{GITHUB_ACTIONS})
+    if(APPLE)
+        # Target Homebrew default installation prefixes for Apple Silicon & Intel macOS
+        list(APPEND CMAKE_PREFIX_PATH 
+            "/opt/homebrew/opt/qt"
+            "/usr/local/opt/qt"
+            "/opt/homebrew"
+        )
+        set(CMAKE_MACOSX_RPATH ON)
+        
+    elseif(UNIX AND NOT APPLE)
+        # Force system paths for standard Linux distros
+        list(APPEND CMAKE_PREFIX_PATH "/usr/lib/x86_64-linux-gnu/cmake")
+    endif()
 endif()
+
 
 if(BUILD_OUT_OF_TREE)
   find_package(libobs REQUIRED)
