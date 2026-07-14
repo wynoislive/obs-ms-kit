@@ -40,12 +40,26 @@ private:
 
 public:
     OutputSession(const std::string& id, const OutputProfile& initial_profile);
+    OutputSession(
+        const std::string& id,
+        const OutputProfile& profile,
+        const std::string& url,
+        const std::string& key,
+        std::unique_ptr<class IScaler> in_scaler,
+        std::unique_ptr<class IEncoderInstance> in_encoder,
+        std::shared_ptr<class NetworkBuffer> in_buffer,
+        std::shared_ptr<class IProtocolClient> in_transport,
+        std::unique_ptr<class ReconnectPolicy> in_reconnect,
+        std::shared_ptr<class HealthMonitor> in_health
+    );
     virtual ~OutputSession() override;
 
     // IOutputSession Lifecycle Overrides
     virtual bool Initialize(const OutputProfile& profile) override;
     virtual void StartPipeline() override;
     virtual void StopPipeline() override;
+    virtual void Open() override { StartPipeline(); }
+    virtual void Close() override { StopPipeline(); }
     virtual void SwapProfile(const OutputProfile& new_profile) override;
 
     // Thread-Safe Status Inspectors

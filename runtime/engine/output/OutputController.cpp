@@ -1,5 +1,15 @@
 #include "OutputController.hpp"
+#include "OutputSession.hpp"
+#include "../protocol/RtmpClient.hpp"
+#include "../protocol/SrtClient.hpp"
+#include "../protocol/WhipClient.hpp"
+#include "ReconnectPolicy.hpp"
+#include "HealthMonitor.hpp"
+#include "../video/Scaler.hpp"
+#include "../encoder/EncoderInstance.hpp"
+#include "../network/NetworkBuffer.hpp"
 #include <obs-module.h>
+#include <util/platform.h>
 
 namespace mskit::engine {
 
@@ -91,6 +101,99 @@ std::vector<std::shared_ptr<IOutputSession>> OutputController::GetAllActiveSessi
         active_list.push_back(session);
     }
     return active_list;
+}
+
+std::shared_ptr<IOutputSession> OutputController::CreateSession(
+    const std::string& node_id,
+    const std::string& protocol,
+    const std::string& url,
+    const std::string& key,
+    const OutputProfile& profile) 
+{
+    // 1. Acquire unique writer lock to prevent concurrent modification race conditions
+    std::unique_lock<std::shared_mutex> lock(registry_mutex);
+
+    // 2. Reject registrations that would cause an ID collision
+    if (sessions.find(node_id) != sessions.end()) {
+        blog(LOG_ERROR, "[MSK-CONTROLLER] Cannot create session: ID '%s' is already registered.", node_id.c_str());
+        return nullptr;
+    }
+
+    blog(LOG_INFO, "[MSK-CONTROLLER] Assembling dependencies for output target node: '%s'", node_id.c_str());
+
+    // Copy and adapt profile parameters
+    OutputProfile session_profile = profile;
+    session_profile.destination_name = node_id;
+    session_profile.endpoint_url = url;
+    session_profile.credential_key = key;
+
+    // 3. Instantiate the correct concrete Protocol Transport Client (ADR-004)
+    std::shared_ptr<IProtocolClient> transport;
+    if (protocol == "RTMP") {
+        session_profile.protocol = StreamProtocol::RTMP;
+        transport = std::make_shared<RtmpClient>(node_id);
+    } else if (protocol == "SRT") {
+        session_profile.protocol = StreamProtocol::SRT;
+        transport = std::make_shared<SrtClient>(node_id);
+    } else if (protocol == "WHIP") {
+        session_profile.protocol = StreamProtocol::WHIP;
+        transport = std::make_shared<WhipClient>(node_id);
+    } else {
+        blog(LOG_ERROR, "[MSK-CONTROLLER] Unknown transport protocol type requested: '%s'", protocol.c_str());
+        return nullptr;
+    }
+
+    // 4. Instantiate the remaining isolated runtime sub-components
+    auto health_monitor = std::make_shared<HealthMonitor>(node_id);
+    
+    ReconnectConfig reconnect_cfg;
+    reconnect_cfg.fallback_url = ""; // Populated dynamically if backup streams are configured
+    auto reconnect_policy = std::make_unique<ReconnectPolicy>(reconnect_cfg);
+
+    auto network_buffer = std::make_shared<NetworkBuffer>(100); // 100-packet bounded limit
+
+    auto scaler = std::make_unique<Scaler>(session_profile.target_width, session_profile.target_height);
+    auto encoder = std::make_unique<EncoderInstance>(node_id);
+
+    // 5. Construct the final concrete OutputSession
+    // Passing all the runtime parts cleanly via move semantics
+    auto session = std::make_shared<OutputSession>(
+        node_id,
+        session_profile,
+        url,
+        key,
+        std::move(scaler),
+        std::move(encoder),
+        network_buffer,
+        transport,
+        std::move(reconnect_policy),
+        health_monitor
+    );
+
+    // 6. Push the newly assembled session into the registry mapping
+    sessions[node_id] = session;
+
+    blog(LOG_INFO, "[MSK-CONTROLLER] Target session '%s' successfully spawned and registered.", node_id.c_str());
+    return session;
+}
+
+bool OutputController::DestroySession(const std::string& node_id) {
+    std::unique_lock<std::shared_mutex> lock(registry_mutex);
+    
+    auto it = sessions.find(node_id);
+    if (it == sessions.end()) {
+        return false;
+    }
+
+    // Force disconnect and clean up native resources safely before deletion
+    auto session = it->second;
+    if (session->IsActive()) {
+        session->StopPipeline();
+    }
+
+    sessions.erase(it);
+    blog(LOG_INFO, "[MSK-CONTROLLER] Target session '%s' successfully destroyed and unregistered.", node_id.c_str());
+    return true;
 }
 
 } // namespace mskit::engine

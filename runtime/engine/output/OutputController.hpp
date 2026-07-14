@@ -35,6 +35,18 @@ public:
     // Resource Coordination: Invoked by the Performance Rule Engine
     void EnforceResourceThrottle(uint32_t max_allowed_priority);
 
+    // Dynamic Session Creation Factory Method
+    std::shared_ptr<IOutputSession> CreateSession(
+        const std::string& node_id,
+        const std::string& protocol,
+        const std::string& url,
+        const std::string& key,
+        const OutputProfile& profile
+    );
+
+    // Explicit Session Teardown
+    bool DestroySession(const std::string& node_id);
+
     // Thread-Safe Accessors
     std::shared_ptr<IOutputSession> GetSession(const std::string& node_id) const;
     std::vector<std::shared_ptr<IOutputSession>> GetAllActiveSessions() const;

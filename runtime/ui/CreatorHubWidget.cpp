@@ -2,6 +2,7 @@
 #include "AddDestinationDialog.hpp"
 #include <QHeaderView>
 #include <QTableWidgetItem>
+#include <QMessageBox>
 #include <obs-module.h>
 
 namespace mskit::ui {
@@ -87,7 +88,6 @@ void CreatorHubWidget::PollTelemetryUpdate() {
 }
 
 void CreatorHubWidget::HandleAddDestinationClick() {
-    // Launch the configuration pane as an application-modal window context
     AddDestinationDialog dialog(this);
 
     if (dialog.exec() == QDialog::Accepted) {
@@ -97,12 +97,20 @@ void CreatorHubWidget::HandleAddDestinationClick() {
         std::string key = dialog.GetStreamKey();
         mskit::OutputProfile profile = dialog.GetProfile();
 
-        blog(LOG_INFO, "[MSK-UI] Registration authorized. Spawning background pipeline node: '%s' over %s protocol.",
-             node_id.c_str(), protocol.c_str());
+        if (control_plane) {
+            // Actively spawn and register the session
+            auto session = control_plane->CreateSession(node_id, protocol, url, key, profile);
 
-        // Note: In our upcoming task execution step, we will pass these
-        // parameters directly to the OutputController registry allocation tools
-        // to instantiate and boot the session pipeline on the fly.
+            if (session) {
+                blog(LOG_INFO, "[MSK-UI] Spawning target output session on the fly: %s", node_id.c_str());
+
+                // Immediately kick off connection and encoding routines
+                session->Open();
+            } else {
+                QMessageBox::critical(this, tr("Creation Failed"),
+                    tr("Could not register the destination. Verify that the ID is unique."));
+            }
+        }
     }
 }
 

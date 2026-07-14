@@ -5,6 +5,8 @@
 #include "../encoder/EncoderInstance.hpp"
 #include "../network/NetworkBuffer.hpp"
 #include "../protocol/RtmpClient.hpp"
+#include "../protocol/SrtClient.hpp"
+#include "../protocol/WhipClient.hpp"
 #include "ReconnectPolicy.hpp"
 #include "HealthMonitor.hpp"
 #include "../../kernel/KernelContext.hpp"
@@ -15,6 +17,36 @@ namespace mskit::engine {
 OutputSession::OutputSession(const std::string& id, const OutputProfile& initial_profile)
     : session_id(id), current_profile(initial_profile) {
     runtime_metrics.state = mskit::SessionState::Stopped;
+    runtime_metrics.health = mskit::OutputHealth::Stopped;
+}
+
+OutputSession::OutputSession(
+    const std::string& id,
+    const OutputProfile& profile,
+    const std::string& url,
+    const std::string& key,
+    std::unique_ptr<class IScaler> in_scaler,
+    std::unique_ptr<class IEncoderInstance> in_encoder,
+    std::shared_ptr<class NetworkBuffer> in_buffer,
+    std::shared_ptr<class IProtocolClient> in_transport,
+    std::unique_ptr<class ReconnectPolicy> in_reconnect,
+    std::shared_ptr<class HealthMonitor> in_health)
+    : session_id(id),
+      current_profile(profile),
+      scaler(std::move(in_scaler)),
+      encoder(std::move(in_encoder)),
+      network_buffer(in_buffer),
+      protocol_client(in_transport),
+      reconnect_policy(std::move(in_reconnect)),
+      health_monitor(in_health),
+      is_initialized(true)
+{
+    current_profile.endpoint_url = url;
+    current_profile.credential_key = key;
+
+    current_state.store(mskit::SessionState::Ready);
+    current_health.store(mskit::OutputHealth::Stopped);
+    runtime_metrics.state = mskit::SessionState::Ready;
     runtime_metrics.health = mskit::OutputHealth::Stopped;
 }
 
@@ -83,16 +115,25 @@ void OutputSession::HandleStateAction(mskit::SessionState state) {
     switch (state) {
         case mskit::SessionState::Initializing: {
             std::lock_guard<std::mutex> lock(config_mutex);
-            scaler = std::make_unique<Scaler>(current_profile.target_width, current_profile.target_height);
-            encoder = std::make_unique<EncoderInstance>(session_id);
-            network_buffer = std::make_shared<NetworkBuffer>(current_profile.network_buffer_ms);
-            protocol_client = std::make_shared<RtmpClient>(session_id);
+            if (!is_initialized) {
+                scaler = std::make_unique<Scaler>(current_profile.target_width, current_profile.target_height);
+                encoder = std::make_unique<EncoderInstance>(session_id);
+                network_buffer = std::make_shared<NetworkBuffer>(current_profile.network_buffer_ms);
+                
+                if (current_profile.protocol == StreamProtocol::SRT) {
+                    protocol_client = std::make_shared<SrtClient>(session_id);
+                } else if (current_profile.protocol == StreamProtocol::WHIP) {
+                    protocol_client = std::make_shared<WhipClient>(session_id);
+                } else {
+                    protocol_client = std::make_shared<RtmpClient>(session_id);
+                }
 
-            ReconnectConfig rec_cfg;
-            reconnect_policy = std::make_unique<ReconnectPolicy>(rec_cfg);
-            health_monitor = std::make_shared<HealthMonitor>(session_id);
+                ReconnectConfig rec_cfg;
+                reconnect_policy = std::make_unique<ReconnectPolicy>(rec_cfg);
+                health_monitor = std::make_shared<HealthMonitor>(session_id);
 
-            is_initialized = true;
+                is_initialized = true;
+            }
             TransitionTo(mskit::SessionState::Ready);
             break;
         }

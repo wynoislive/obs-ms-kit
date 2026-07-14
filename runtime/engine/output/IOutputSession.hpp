@@ -19,6 +19,9 @@ public:
     virtual bool Initialize(const OutputProfile& profile) = 0;
     virtual void StartPipeline() = 0;
     virtual void StopPipeline() = 0;
+
+    virtual void Open() = 0;
+    virtual void Close() = 0;
     
     // ADR-009: Atomically update properties via Profile Swapping
     virtual void SwapProfile(const OutputProfile& new_profile) = 0;
