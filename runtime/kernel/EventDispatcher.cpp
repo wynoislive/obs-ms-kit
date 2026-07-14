@@ -1,5 +1,7 @@
 #include "EventDispatcher.hpp"
 #include <obs-module.h>
+#include <mutex>
+
 
 namespace mskit::kernel {
 
