@@ -16,6 +16,10 @@ if(ENABLE_CCACHE AND CCACHE_PROGRAM)
   set(CMAKE_XCODE_ATTRIBUTE_CXX "${CMAKE_CURRENT_BINARY_DIR}/ccache-launcher-cxx")
   set(CMAKE_XCODE_ATTRIBUTE_LD "${CMAKE_C_COMPILER}")
   set(CMAKE_XCODE_ATTRIBUTE_LDPLUSPLUS "${CMAKE_CXX_COMPILER}")
+  
+  # Xcode 16 "Explicit Modules" fails to recognize the ccache wrapper script as a valid compiler.
+  # This causes it to inject conflicting deployment targets and fail the build.
+  set(CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_EXPLICIT_MODULES NO)
 endif()
 
 # Set project variables
