@@ -1,10 +1,10 @@
 #pragma once
-#include "IServiceRegistry.hpp"
+#include "ServiceRegistry.hpp"
 #include <cstdint>
 
 namespace mskit::kernel {
 
-enum class KernelState : uint8_t {
+enum class KernelRuntimeState : uint8_t {
     Boot,
     Initialize,
     Ready,
@@ -16,15 +16,13 @@ enum class KernelState : uint8_t {
 class IKernelContext {
 public:
     virtual ~IKernelContext() = default;
-
-    // Lifecycle Control Contracts
+    
     virtual bool BootKernel() = 0;
     virtual void ShutdownKernel() = 0;
-
-    // Engine Core access handles
-    virtual KernelState GetKernelState() const = 0;
-    virtual const IServiceRegistry& GetRegistry() const = 0;
-    virtual IServiceRegistry& GetWritableRegistry() = 0;
+    
+    virtual KernelRuntimeState GetState() const = 0;
+    virtual const ServiceRegistry& GetRegistry() const = 0;
+    virtual ServiceRegistry& GetWritableRegistry() = 0;
 };
 
 } // namespace mskit::kernel

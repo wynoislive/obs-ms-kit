@@ -53,6 +53,24 @@ if(OS_WINDOWS)
   configure_file(cmake/windows/resources/installer-Windows.iss.in "${CMAKE_CURRENT_BINARY_DIR}/installer-Windows.generated.iss")
 endif()
 
+set(KERNEL_HEADERS
+  runtime/kernel/IService.hpp
+  runtime/kernel/ILogger.hpp
+  runtime/kernel/ServiceRegistry.hpp
+  runtime/kernel/IKernelContext.hpp
+  runtime/kernel/IScheduler.hpp
+  runtime/kernel/IEventDispatcher.hpp
+  runtime/kernel/IConfigManager.hpp
+)
+
+set(ENGINE_HEADERS
+  runtime/engine/config/OutputProfile.hpp
+  runtime/engine/output/OutputRuntimeState.hpp
+  runtime/engine/output/IOutputSession.hpp
+  runtime/engine/output/OutputRegistry.hpp
+  runtime/engine/output/OutputController.hpp
+)
+
 target_sources(${PROJECT_NAME} PRIVATE
   config-dialog.cpp
   config-utils.cpp
@@ -66,7 +84,9 @@ target_sources(${PROJECT_NAME} PRIVATE
 	output-dialog.hpp
 	stream-key-input.hpp
     multistream.hpp
-	file-updater.h)
+	file-updater.h
+  ${KERNEL_HEADERS}
+  ${ENGINE_HEADERS})
 
 if(BUILD_OUT_OF_TREE)
 	set_target_properties_plugin(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

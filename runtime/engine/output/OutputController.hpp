@@ -1,31 +1,53 @@
 #pragma once
-#include "IOutputNode.hpp"
-#include <vector>
-#include <unordered_map>
+#include "OutputRegistry.hpp"
+#include <memory>
 #include <shared_mutex>
 
 namespace mskit {
 
 class OutputController {
 private:
-    std::unordered_map<std::string, std::shared_ptr<IOutputNode>> active_nodes;
+    std::shared_ptr<OutputRegistry> registry;
     mutable std::shared_mutex controller_mutex;
 
 public:
-    OutputController() = default;
+    explicit OutputController(std::shared_ptr<OutputRegistry> reg) : registry(reg) {}
     ~OutputController() = default;
 
-    // Master Control Plane Methods
-    bool RegisterDestination(const OutputNodeConfig& config);
-    bool RemoveDestination(const std::string& node_id);
-    
-    void GlobalTriggerStart();
-    void GlobalTriggerStop();
-    
+    // Master Control Plane Orchestrations
+    void StartSession(const std::string& session_id) {
+        std::shared_lock<std::shared_mutex> lock(controller_mutex);
+        if (auto session = registry->FindSession(session_id)) {
+            session->StartPipeline();
+        }
+    }
+
+    void StopSession(const std::string& session_id) {
+        std::shared_lock<std::shared_mutex> lock(controller_mutex);
+        if (auto session = registry->FindSession(session_id)) {
+            session->StopPipeline();
+        }
+    }
+
+    void SwapSessionProfile(const std::string& session_id, const OutputProfile& new_profile) {
+        std::shared_lock<std::shared_mutex> lock(controller_mutex);
+        if (auto session = registry->FindSession(session_id)) {
+            session->SwapProfile(new_profile);
+        }
+    }
+
+    void GlobalTriggerStart() {
+        // TBD: Global start across all registered sessions
+    }
+
+    void GlobalTriggerStop() {
+        // TBD: Global stop across all registered sessions
+    }
+
     // Resource Coordination Hook for the Rule Engine
-    void ThrottleNodePriority(uint32_t threshold_priority);
-    
-    std::shared_ptr<IOutputNode> FindNode(const std::string& node_id) const;
+    void ThrottleSessionPriority(uint32_t threshold_priority) {
+        // TBD: Throttling sessions based on priority constraints
+    }
 };
 
 } // namespace mskit
