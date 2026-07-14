@@ -133,3 +133,90 @@ if(BUILD_OUT_OF_TREE)
 else()
 	set_target_properties_obs(${PROJECT_NAME} PROPERTIES FOLDER "plugins/aitum" PREFIX "")
 endif()
+
+# ============================================================================
+# Milestone 10: Installation & Distribution Packaging
+# ============================================================================
+
+# 1. Establish strict, canonical install paths
+set(MSK_PLUGIN_NAME "obs-ms-kit")
+
+if(WIN32)
+    set(MSK_INSTALL_BIN "obs-plugins/64bit")
+    set(MSK_INSTALL_DATA "data/obs-plugins/${MSK_PLUGIN_NAME}")
+else()
+    # Support standard POSIX directory layouts for future cross-platform builds
+    set(MSK_INSTALL_BIN "obs-plugins")
+    set(MSK_INSTALL_DATA "data/obs-plugins/${MSK_PLUGIN_NAME}")
+endif()
+
+message(STATUS "[MS-KIT] Configuring install target distributions...")
+message(STATUS "        Binary Destination: ${MSK_INSTALL_BIN}")
+message(STATUS "        Resource Destination: ${MSK_INSTALL_DATA}")
+
+# 2. Package the primary binary target
+install(TARGETS aitum-multistream
+    LIBRARY DESTINATION ${MSK_INSTALL_BIN}
+    RUNTIME DESTINATION ${MSK_INSTALL_BIN}
+    ARCHIVE DESTINATION ${MSK_INSTALL_BIN}
+)
+
+# 3. Package UI Assets (Icons, SVGs, QSS Stylesheets)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    install(DIRECTORY assets/
+        DESTINATION ${MSK_INSTALL_DATA}/assets
+        FILES_MATCHING 
+        PATTERN "*.png" 
+        PATTERN "*.svg" 
+        PATTERN "*.qss"
+    )
+    message(STATUS "        Registered UI Asset directory for distribution.")
+endif()
+
+# 4. Package UI Locale Translations
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/locale")
+    install(DIRECTORY locale/
+        DESTINATION ${MSK_INSTALL_DATA}/locale
+        FILES_MATCHING 
+        PATTERN "*.ini" 
+        PATTERN "*.json"
+    )
+    message(STATUS "        Registered Localization dictionary for distribution.")
+endif()
+
+# 5. Package Immutable Configuration Schemas
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/config/profile-schema.json")
+    install(FILES config/profile-schema.json
+        DESTINATION ${MSK_INSTALL_DATA}/config
+    )
+    message(STATUS "        Registered Configuration Schema for distribution.")
+endif()
+
+# ============================================================================
+# Rapid Development Deployment Target
+# ============================================================================
+
+# Expose a cached variable to easily point to your local test OBS Studio folder
+set(OBS_DIR "" CACHE PATH "Path to your local testing OBS Studio installation folder")
+
+if(OBS_DIR)
+    add_custom_target(dev-install
+        # 1. Hot-deploy the updated compiled binary
+        COMMAND ${CMAKE_COMMAND} -E copy 
+            $<TARGET_FILE:aitum-multistream> 
+            "${OBS_DIR}/${MSK_INSTALL_BIN}/$<TARGET_FILE_NAME:aitum-multistream>"
+            
+        # 2. Sync active resource changes
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets" 
+            "${OBS_DIR}/${MSK_INSTALL_DATA}/assets"
+            
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${CMAKE_CURRENT_SOURCE_DIR}/locale" 
+            "${OBS_DIR}/${MSK_INSTALL_DATA}/locale"
+            
+        COMMENT "Hot-deploying MS-Kit binaries and UI assets to test environment: ${OBS_DIR}"
+        DEPENDS aitum-multistream
+    )
+endif()
+
