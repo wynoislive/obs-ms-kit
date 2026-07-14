@@ -70,6 +70,7 @@ set(ENGINE_HEADERS
   runtime/engine/output/OutputController.hpp
   runtime/engine/output/OutputSession.hpp
   runtime/engine/network/NetworkBuffer.hpp
+  runtime/engine/video/FrameDistributor.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -82,6 +83,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/engine/output/OutputSession.cpp
   runtime/engine/output/OutputController.cpp
   runtime/engine/network/NetworkBuffer.cpp
+  runtime/engine/video/FrameDistributor.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
