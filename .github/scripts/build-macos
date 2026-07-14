@@ -111,6 +111,8 @@ build() {
   }
 
   log_group "Configuring ${product_name}..."
+  # Unset this to prevent conflict with CMake-defined targets
+  unset MACOSX_DEPLOYMENT_TARGET
   cmake -S ${project_root} ${cmake_args}
 
   log_group "Building ${product_name}..."
