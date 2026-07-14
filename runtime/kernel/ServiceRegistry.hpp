@@ -28,6 +28,11 @@ public:
         }
         return std::static_pointer_cast<InterfaceType>(it->second);
     }
+
+    void Clear() {
+        std::unique_lock<std::shared_mutex> lock(registry_mutex);
+        services.clear();
+    }
 };
 
 } // namespace mskit::kernel

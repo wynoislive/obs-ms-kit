@@ -1,4 +1,5 @@
 #include "CreatorHubWidget.hpp"
+#include "AddDestinationDialog.hpp"
 #include <QHeaderView>
 #include <QTableWidgetItem>
 #include <obs-module.h>
@@ -86,8 +87,23 @@ void CreatorHubWidget::PollTelemetryUpdate() {
 }
 
 void CreatorHubWidget::HandleAddDestinationClick() {
-    // Action trigger entry point hook reserved for setting up interactive modal profile config views
-    blog(LOG_INFO, "[MSK-UI] Registration modal requested by creator.");
+    // Launch the configuration pane as an application-modal window context
+    AddDestinationDialog dialog(this);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        std::string node_id = dialog.GetNodeId();
+        std::string protocol = dialog.GetProtocol();
+        std::string url = dialog.GetUrl();
+        std::string key = dialog.GetStreamKey();
+        mskit::OutputProfile profile = dialog.GetProfile();
+
+        blog(LOG_INFO, "[MSK-UI] Registration authorized. Spawning background pipeline node: '%s' over %s protocol.",
+             node_id.c_str(), protocol.c_str());
+
+        // Note: In our upcoming task execution step, we will pass these
+        // parameters directly to the OutputController registry allocation tools
+        // to instantiate and boot the session pipeline on the fly.
+    }
 }
 
 } // namespace mskit::ui

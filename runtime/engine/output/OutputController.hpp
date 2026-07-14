@@ -2,6 +2,7 @@
 
 #include "IOutputSession.hpp"
 #include "../config/OutputProfile.hpp"
+#include "../../kernel/IService.hpp"
 #include <unordered_map>
 #include <shared_mutex>
 #include <memory>
@@ -10,7 +11,7 @@
 
 namespace mskit::engine {
 
-class OutputController {
+class OutputController : public mskit::kernel::IService {
 private:
     // Core session registry bucket
     std::unordered_map<std::string, std::shared_ptr<IOutputSession>> sessions;
@@ -20,7 +21,9 @@ private:
 
 public:
     OutputController() = default;
-    ~OutputController() { GlobalTriggerStop(); }
+    virtual ~OutputController() override { GlobalTriggerStop(); }
+
+    virtual const char* GetServiceName() const override { return "OutputController"; }
 
     // Control Plane: Node Lifecycle Management
     bool RegisterSession(const std::string& node_id, std::shared_ptr<IOutputSession> session);

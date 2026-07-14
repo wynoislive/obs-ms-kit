@@ -87,6 +87,7 @@ set(ENGINE_HEADERS
   runtime/engine/protocol/WhipClient.hpp
   runtime/engine/analytics/PerformanceRuleEngine.hpp
   runtime/ui/CreatorHubWidget.hpp
+  runtime/ui/AddDestinationDialog.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -113,6 +114,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/kernel/ConfigManager.cpp
   runtime/engine/analytics/PerformanceRuleEngine.cpp
   runtime/ui/CreatorHubWidget.cpp
+  runtime/ui/AddDestinationDialog.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp

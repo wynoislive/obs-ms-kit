@@ -3,6 +3,9 @@
 #include "obs-module.h"
 #include "version.h"
 #include <obs-frontend-api.h>
+#include "runtime/kernel/KernelContext.hpp"
+#include "runtime/engine/output/OutputController.hpp"
+#include "runtime/ui/CreatorHubWidget.hpp"
 #include <QDesktopServices>
 #include <QGroupBox>
 #include <QLabel>
@@ -45,6 +48,38 @@ bool obs_module_load(void)
 {
 	blog(LOG_INFO, "[Aitum-Multistream] loaded version %s", PROJECT_VERSION);
 
+	// 1. Boot the central system core kernel context
+	auto kernel_ctx = mskit::kernel::KernelContext::GetInstance();
+	if (!kernel_ctx->BootKernel()) {
+		blog(LOG_ERROR, "[MSK-MAIN] Core runtime kernel failed to boot. Aborting setup loop.");
+		return false;
+	}
+
+	// 2. Resolve the concurrent OutputController registry plane
+	auto output_controller = kernel_ctx->GetRegistry().ResolveService<mskit::engine::OutputController>();
+	if (!output_controller) {
+		blog(LOG_ERROR, "[MSK-MAIN] Failed to resolve active OutputController from kernel registry.");
+		kernel_ctx->ShutdownKernel();
+		return false;
+	}
+
+	// 3. Instantiate the modern Qt6 dashboard widget passing the registry hook
+	auto* dashboard_widget = new mskit::ui::CreatorHubWidget(output_controller);
+
+	// 4. Anchor our dashboard layout safely to OBS Studio's native UI dock framework
+	bool dock_added = obs_frontend_add_dock_by_id(
+		"mskit_creator_hub_dock",
+		"Creator Hub Dashboard",
+		dashboard_widget
+	);
+
+	if (dock_added) {
+		blog(LOG_INFO, "[MSK-MAIN] Creator Hub dock successfully anchored to OBS Studio UI frame matrix.");
+	} else {
+		blog(LOG_WARNING, "[MSK-MAIN] Failed to anchor dock. Identifier 'mskit_creator_hub_dock' might be occupied.");
+		delete dashboard_widget;
+	}
+
 	const auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
 	multistream_dock = new MultistreamDock(main_window);
 	obs_frontend_add_dock_by_id("AitumMultistreamDock", obs_module_text("AitumMultistream"), multistream_dock);
@@ -69,6 +104,10 @@ void obs_module_post_load()
 
 void obs_module_unload()
 {
+	// Shut down core systems and drop RAII-scoped service registry collections safely
+	auto kernel_ctx = mskit::kernel::KernelContext::GetInstance();
+	kernel_ctx->ShutdownKernel();
+
 	if (version_update_info) {
 		update_info_destroy(version_update_info);
 		version_update_info = nullptr;
