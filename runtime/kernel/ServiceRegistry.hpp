@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <typeindex>
 #include <shared_mutex>
+#include <mutex>
+
 
 namespace mskit::kernel {
 

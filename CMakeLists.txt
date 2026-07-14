@@ -240,3 +240,43 @@ if(OBS_DIR)
     )
 endif()
 
+# ============================================================================
+# Milestone 13: CPack Deployment Packaging (macOS DMG & Linux DEB)
+# ============================================================================
+
+# 1. Base CPack Metadata (shared across all distribution targets)
+set(CPACK_PACKAGE_NAME "obs-ms-kit")
+set(CPACK_PACKAGE_VENDOR "Wyno")
+set(CPACK_PACKAGE_CONTACT "https://github.com/wynoislive/obs-ms-kit")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Automated multi-destination streaming plugin for OBS Studio")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_PATCH 0)
+
+# 2. Platform-Specific Installer Definitions
+if(APPLE)
+    # DragNDrop generator compiles a clean, mountable DMG disk image
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "obs-ms-kit Installer")
+    set(CPACK_DMG_FORMAT "UDZO") # Compressed read-only format
+    
+    # Standard macOS target directory path for OBS Studio global plugins
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/Library/Application Support/obs-studio/plugins")
+
+elseif(UNIX AND NOT APPLE)
+    # DEB generator packages binaries, assets, and dependencies into a Debian package
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Wyno <wynoislive@gmail.com>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "video")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    
+    # Ensure the package manager checks for an existing OBS installation on the client system
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "obs-studio (>= 30.0)")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+endif()
+
+# 3. Include the CPack engine module to hook existing install() commands
+include(CPack)
+
+

@@ -90,9 +90,13 @@ jobs:
           : Set Up Environment 🔧
           if (( ${+RUNNER_DEBUG} )) setopt XTRACE
 
-          print '::group::Enable Xcode 16.1'
-          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
-          print '::endgroup::'
+          if [[ -d "/Applications/Xcode_16.1.0.app" ]]; then
+            print '::group::Enable Xcode 16.1'
+            sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
+            print '::endgroup::'
+          else
+            print 'Xcode 16.1.0 bundle not found at explicit path. Utilizing runner default environment.'
+          fi
 
           print '::group::Clean Homebrew Environment'
           local -a unwanted_formulas=()
