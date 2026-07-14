@@ -2,6 +2,7 @@
 #include "Scheduler.hpp"
 #include "EventDispatcher.hpp"
 #include "ConfigManager.hpp"
+#include "../engine/analytics/PerformanceRuleEngine.hpp"
 #include <obs-module.h>
 
 namespace mskit::kernel {
@@ -34,6 +35,10 @@ bool KernelContext::BootKernel() {
     // Register configuration manager
     auto config_mgr = std::make_shared<ConfigManager>();
     service_registry.RegisterService<IConfigManager>(config_mgr);
+
+    // Register automated performance analytics throttling loop service
+    auto rule_engine = std::make_shared<mskit::engine::PerformanceRuleEngine>();
+    service_registry.RegisterService<mskit::kernel::IService>(rule_engine);
 
     runtime_state = KernelRuntimeState::Ready;
     blog(LOG_INFO, "[MSK-CORE] MS-Kit Platform Kernel Context successfully booted.");

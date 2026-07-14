@@ -281,4 +281,37 @@ OutputProfile OutputSession::GetProfile() const {
     return current_profile;
 }
 
+bool OutputSession::IsActive() const {
+    mskit::SessionState state = current_state.load();
+    return (state != mskit::SessionState::Stopped && state != mskit::SessionState::Error);
+}
+
+void OutputSession::GetLiveTelemetry(uint32_t& out_bitrate, double& out_fps, uint32_t& out_dropped) const {
+    std::lock_guard<std::mutex> lock(telemetry_mutex);
+    out_bitrate = runtime_metrics.current_bitrate;
+    out_fps = runtime_metrics.output_fps;
+    out_dropped = static_cast<uint32_t>(runtime_metrics.dropped_frames);
+}
+
+void OutputSession::GetNetworkTelemetry(int64_t& out_rtt_ms, double& out_congestion_factor) const {
+    if (protocol_client && protocol_client->IsConnected()) {
+        protocol_client->GetNetworkTelemetry(out_rtt_ms, out_congestion_factor);
+    } else {
+        out_rtt_ms = 0;
+        out_congestion_factor = 0.0;
+    }
+}
+
+std::shared_ptr<mskit::engine::HealthMonitor> OutputSession::GetHealthMonitor() const {
+    return health_monitor;
+}
+
+bool OutputSession::UpdateBitrate(uint32_t new_bitrate_kbps) {
+    std::lock_guard<std::mutex> lock(encoder_mutex);
+    if (encoder && encoder->IsActive()) {
+        return encoder->UpdateBitrate(new_bitrate_kbps);
+    }
+    return false;
+}
+
 } // namespace mskit::engine

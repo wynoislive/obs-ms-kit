@@ -56,6 +56,12 @@ public:
     virtual uint32_t GetPriorityLevel() const override;
     virtual OutputProfile GetProfile() const override;
 
+    virtual bool IsActive() const override;
+    virtual void GetLiveTelemetry(uint32_t& out_bitrate, double& out_fps, uint32_t& out_dropped) const override;
+    virtual void GetNetworkTelemetry(int64_t& out_rtt_ms, double& out_congestion_factor) const override;
+    virtual std::shared_ptr<mskit::engine::HealthMonitor> GetHealthMonitor() const override;
+    virtual bool UpdateBitrate(uint32_t new_bitrate_kbps) override;
+
     // Data Plane entry points
     virtual void ProcessVideoFrame(obs_source_t* source) override;
     void PipelineToBuffer(struct encoder_packet* packet);

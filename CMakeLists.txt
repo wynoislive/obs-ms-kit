@@ -85,6 +85,8 @@ set(ENGINE_HEADERS
   runtime/engine/protocol/RtmpClient.hpp
   runtime/engine/protocol/SrtClient.hpp
   runtime/engine/protocol/WhipClient.hpp
+  runtime/engine/analytics/PerformanceRuleEngine.hpp
+  runtime/ui/CreatorHubWidget.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -109,6 +111,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/kernel/KernelContext.cpp
   runtime/kernel/EventDispatcher.cpp
   runtime/kernel/ConfigManager.cpp
+  runtime/engine/analytics/PerformanceRuleEngine.cpp
+  runtime/ui/CreatorHubWidget.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
