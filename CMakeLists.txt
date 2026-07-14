@@ -69,6 +69,7 @@ set(ENGINE_HEADERS
   runtime/engine/output/IOutputSession.hpp
   runtime/engine/output/OutputRegistry.hpp
   runtime/engine/output/OutputController.hpp
+  runtime/engine/output/OutputSession.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -78,6 +79,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   stream-key-input.cpp
   multistream.cpp
   file-updater.c
+  runtime/engine/output/OutputSession.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp

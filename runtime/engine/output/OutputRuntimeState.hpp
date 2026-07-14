@@ -30,6 +30,7 @@ struct OutputRuntimeState {
     SessionState state      = SessionState::Stopped;
     OutputHealth health    = OutputHealth::Stopped;
     uint32_t current_bitrate = 0;
+    double output_fps        = 0.0;
     uint64_t dropped_frames  = 0;
     uint32_t reconnect_count = 0;
     uint32_t rtt_ms          = 0;
