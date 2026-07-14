@@ -69,6 +69,7 @@ set(ENGINE_HEADERS
   runtime/engine/output/IOutputSession.hpp
   runtime/engine/output/OutputController.hpp
   runtime/engine/output/OutputSession.hpp
+  runtime/engine/network/NetworkBuffer.hpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -80,6 +81,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   file-updater.c
   runtime/engine/output/OutputSession.cpp
   runtime/engine/output/OutputController.cpp
+  runtime/engine/network/NetworkBuffer.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
