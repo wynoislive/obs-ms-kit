@@ -33,15 +33,15 @@
     },
     "platformConfig": {
         "macos": {
-            "bundleId": "tv.aitum.multi"
+            "bundleId": "tv.wyno.multi"
         }
     },
-    "name": "aitum-multistream",
-    "displayName": "Aitum Multistream",
+    "name": "obs-ms-kit",
+    "displayName": "Wyno Multistream",
     "version": "1.0.8",
-    "author": "Aitum",
-    "website": "https://aitum.tv",
-    "email": "support@aitum.tv",
+    "author": "Wyno",
+    "website": "https://wyno.tv",
+    "email": "support@wyno.tv",
     "uuids": {
         "windowsApp": "7E8814F2-03EE-4E2E-8062-A9A184EC0618"
     }

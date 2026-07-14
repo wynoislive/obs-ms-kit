@@ -52,7 +52,7 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 {
 	setMinimumWidth(983);
 	setMinimumHeight(480);
-	setWindowTitle(obs_module_text("AitumMultistreamSettings"));
+	setWindowTitle(obs_module_text("WynoMultistreamSettings"));
 	setSizeGripEnabled(true);
 
 	const auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
@@ -86,7 +86,7 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 	listwidgetitem->setText(QString::fromUtf8(obs_module_text("Help")));
 
 	listwidgetitem = new QListWidgetItem(listWidget);
-	listwidgetitem->setIcon(QIcon(QString::fromUtf8(":/aitum/media/aitum.png")));
+	listwidgetitem->setIcon(QIcon(QString::fromUtf8(":/wyno/media/wyno.png")));
 	listwidgetitem->setText(QString::fromUtf8(obs_module_text("SupportButton")));
 
 	listWidget->setCurrentRow(0);
@@ -121,13 +121,13 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 								QIcon(QString::fromUtf8(":/settings/images/settings/stream.svg")));
 	generalHelpButton = ConfigUtils::generateMenuButton(QString::fromUtf8(obs_module_text("SettingsHelpButton")),
 							    main_window->property("defaultIcon").value<QIcon>());
-	generalSupportAitumButton = ConfigUtils::generateMenuButton(QString::fromUtf8(obs_module_text("SupportButton")),
-								    QIcon(QString::fromUtf8(":/aitum/media/aitum.png")));
+	generalSupportWynoButton = ConfigUtils::generateMenuButton(QString::fromUtf8(obs_module_text("SupportButton")),
+								    QIcon(QString::fromUtf8(":/wyno/media/wyno.png")));
 
 	buttonLayout->addWidget(generalMainButton, 0);
 	buttonLayout->addWidget(generalVerticalButton, 0);
 	buttonLayout->addWidget(generalHelpButton, 0);
-	buttonLayout->addWidget(generalSupportAitumButton, 0);
+	buttonLayout->addWidget(generalSupportWynoButton, 0);
 
 	buttonGroupBox->setLayout(buttonLayout);
 
@@ -211,7 +211,7 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 	auto streaming_title = new QLabel(QString::fromUtf8(obs_module_text("MainCanvas")));
 	streaming_title->setStyleSheet(QString::fromUtf8("font-weight: bold;"));
 	streaming_title_layout->addWidget(streaming_title, 0, Qt::AlignLeft);
-	//auto guide_link = new QLabel(QString::fromUtf8("<a href=\"https://l.aitum.tv/vh-streaming-settings\">") + QString::fromUtf8(obs_module_text("ViewGuide")) + QString::fromUtf8("</a>"));
+	//auto guide_link = new QLabel(QString::fromUtf8("<a href=\"https://l.wyno.tv/vh-streaming-settings\">") + QString::fromUtf8(obs_module_text("ViewGuide")) + QString::fromUtf8("</a>"));
 	//guide_link->setOpenExternalLinks(true);
 
 	auto addButton = new QPushButton(QIcon(":/res/images/plus.svg"), QString::fromUtf8(obs_module_text("AddOutput")));
@@ -297,7 +297,7 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 	streaming_title = new QLabel(QString::fromUtf8(obs_module_text("VerticalCanvas")));
 	streaming_title->setStyleSheet(QString::fromUtf8("font-weight: bold;"));
 	streaming_title_layout->addWidget(streaming_title, 0, Qt::AlignLeft);
-	//auto guide_link = new QLabel(QString::fromUtf8("<a href=\"https://l.aitum.tv/vh-streaming-settings\">") + QString::fromUtf8(obs_module_text("ViewGuide")) + QString::fromUtf8("</a>"));
+	//auto guide_link = new QLabel(QString::fromUtf8("<a href=\"https://l.wyno.tv/vh-streaming-settings\">") + QString::fromUtf8(obs_module_text("ViewGuide")) + QString::fromUtf8("</a>"));
 	//guide_link->setOpenExternalLinks(true);
 	//	addButton = new QPushButton(QIcon(":/res/images/plus.svg"), QString::fromUtf8(obs_module_text("AddOutput")));
 	//	addButton->setProperty("themeID", QVariant(QString::fromUtf8("addIconSmall")));
@@ -376,7 +376,7 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 	///
 	const auto version =
 		new QLabel(QString::fromUtf8(obs_module_text("Version")) + " " + QString::fromUtf8(PROJECT_VERSION) + " " +
-			   QString::fromUtf8(obs_module_text("MadeBy")) + " <a href=\"https://aitum.tv\">Aitum</a>");
+			   QString::fromUtf8(obs_module_text("MadeBy")) + " <a href=\"https://wyno.tv\">Wyno</a>");
 	version->setOpenExternalLinks(true);
 	version->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
 
@@ -418,7 +418,7 @@ OBSBasicSettings::OBSBasicSettings(QMainWindow *parent) : QDialog(parent)
 
 	connect(generalHelpButton, &QPushButton::clicked, [this] { listWidget->setCurrentRow(listWidget->count() - 2); });
 
-	connect(generalSupportAitumButton, &QPushButton::clicked, [this] { listWidget->setCurrentRow(listWidget->count() - 1); });
+	connect(generalSupportWynoButton, &QPushButton::clicked, [this] { listWidget->setCurrentRow(listWidget->count() - 1); });
 }
 
 OBSBasicSettings::~OBSBasicSettings()
@@ -1021,7 +1021,7 @@ void OBSBasicSettings::LoadVerticalSettings(bool load)
 		auto ph = obs_get_proc_handler();
 		struct calldata cd;
 		calldata_init(&cd);
-		if (!proc_handler_call(ph, "aitum_vertical_get_stream_settings", &cd)) {
+		if (!proc_handler_call(ph, "wyno_vertical_get_stream_settings", &cd)) {
 			// Disable button if we don't have vertical
 			verticalAddButton->setEnabled(false);
 			calldata_free(&cd);
@@ -1049,7 +1049,7 @@ void OBSBasicSettings::SaveVerticalSettings()
 	struct calldata cd;
 	calldata_init(&cd);
 	calldata_set_ptr(&cd, "outputs", vertical_outputs);
-	proc_handler_call(ph, "aitum_vertical_set_stream_settings", &cd);
+	proc_handler_call(ph, "wyno_vertical_set_stream_settings", &cd);
 	calldata_free(&cd);
 }
 
@@ -1388,7 +1388,7 @@ void OBSBasicSettings::LoadOutputStats(std::vector<video_t *> *oldVideos)
 	auto ph = obs_get_proc_handler();
 	struct calldata cd;
 	calldata_init(&cd);
-	if (proc_handler_call(ph, "aitum_vertical_get_video", &cd))
+	if (proc_handler_call(ph, "wyno_vertical_get_video", &cd))
 		vertical_video = (video_t *)calldata_ptr(&cd, "video");
 	calldata_free(&cd);
 	for (auto it = refs.begin(); it != refs.end(); it++) {

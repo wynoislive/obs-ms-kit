@@ -82,21 +82,21 @@ QIcon ConfigUtils::getPlatformIconFromEndpoint(QString endpoint)
 	if (endpoint.contains(QString::fromUtf8("ingest.global-contribute.live-video.net")) ||
 	    endpoint.contains(QString::fromUtf8(".contribute.live-video.net")) ||
 	    endpoint.contains(QString::fromUtf8(".twitch.tv"))) { // twitch
-		return QIcon(":/aitum/media/twitch.png");
+		return QIcon(":/wyno/media/twitch.png");
 	} else if (endpoint.contains(QString::fromUtf8(".youtube.com"))) { // youtube
-		return QIcon(":/aitum/media/youtube.png");
+		return QIcon(":/wyno/media/youtube.png");
 	} else if (endpoint.contains(QString::fromUtf8("fa723fc1b171.global-contribute.live-video.net"))) { // kick
-		return QIcon(":/aitum/media/kick.png");
+		return QIcon(":/wyno/media/kick.png");
 	} else if (endpoint.contains(QString::fromUtf8(".tiktokcdn"))) { // tiktok
-		return QIcon(":/aitum/media/tiktok.png");
+		return QIcon(":/wyno/media/tiktok.png");
 	} else if (endpoint.contains(QString::fromUtf8(".pscp.tv"))) { // twitter
-		return QIcon(":/aitum/media/twitter.png");
+		return QIcon(":/wyno/media/twitter.png");
 	} else if (endpoint.contains(QString::fromUtf8("livepush.trovo.live"))) { // trovo
-		return QIcon(":/aitum/media/trovo.png");
+		return QIcon(":/wyno/media/trovo.png");
 	} else if (endpoint.contains(QString::fromUtf8(".facebook.com")) ||
 		   endpoint.contains(QString::fromUtf8(".fbcdn.net"))) { // facebook
-		return QIcon(":/aitum/media/facebook.png");
+		return QIcon(":/wyno/media/facebook.png");
 	} else { // unknown
-		return QIcon(":/aitum/media/unknown.png");
+		return QIcon(":/wyno/media/unknown.png");
 	}
 }

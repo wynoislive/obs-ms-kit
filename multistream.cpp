@@ -23,8 +23,8 @@ extern "C" {
 }
 
 OBS_DECLARE_MODULE()
-OBS_MODULE_AUTHOR("Aitum");
-OBS_MODULE_USE_DEFAULT_LOCALE("aitum-multistream", "en-US")
+OBS_MODULE_AUTHOR("Wyno");
+OBS_MODULE_USE_DEFAULT_LOCALE("obs-ms-kit", "en-US")
 
 static MultistreamDock *multistream_dock = nullptr;
 
@@ -47,7 +47,7 @@ bool version_info_downloaded(void *param, struct file_download_data *file)
 
 bool obs_module_load(void)
 {
-	blog(LOG_INFO, "[Aitum-Multistream] loaded version %s", PROJECT_VERSION);
+	blog(LOG_INFO, "[Wyno-Multistream] loaded version %s", PROJECT_VERSION);
 
 	// 1. Boot the central system core kernel context
 	auto kernel_ctx = mskit::kernel::KernelContext::GetInstance();
@@ -83,9 +83,9 @@ bool obs_module_load(void)
 
 	const auto main_window = static_cast<QMainWindow *>(obs_frontend_get_main_window());
 	multistream_dock = new MultistreamDock(main_window);
-	obs_frontend_add_dock_by_id("AitumMultistreamDock", obs_module_text("AitumMultistream"), multistream_dock);
+	obs_frontend_add_dock_by_id("WynoMultistreamDock", obs_module_text("WynoMultistream"), multistream_dock);
 
-	std::string url = "https://api.aitum.tv/plugin/multi";
+	std::string url = "https://api.wyno.tv/plugin/multi";
 	const char *pguid = config_get_string(obs_frontend_get_app_config(), "General", "InstallGUID");
 	if (pguid) {
 		url += "?uuid=";
@@ -93,7 +93,7 @@ bool obs_module_load(void)
 	}
 
 	version_update_info =
-		update_info_create_single("[Aitum Multistream]", "OBS", url.c_str(), version_info_downloaded, nullptr);
+		update_info_create_single("[Wyno Multistream]", "OBS", url.c_str(), version_info_downloaded, nullptr);
 
 #ifdef _DEBUG
 	// Automatically execute our verification simulation in debug builds
@@ -127,7 +127,7 @@ void obs_module_unload()
 
 const char *obs_module_name(void)
 {
-	return obs_module_text("AitumMultistream");
+	return obs_module_text("WynoMultistream");
 }
 
 void RemoveWidget(QWidget *widget);
@@ -365,7 +365,7 @@ MultistreamDock::MultistreamDock(QWidget *parent) : QFrame(parent)
 	configButton->setFlat(true);
 	configButton->setAutoDefault(false);
 	//configButton->setSizePolicy(sp2);
-	configButton->setToolTip(QString::fromUtf8(obs_module_text("AitumMultistreamSettings")));
+	configButton->setToolTip(QString::fromUtf8(obs_module_text("WynoMultistreamSettings")));
 	QPushButton::connect(configButton, &QPushButton::clicked, [this] {
 		if (!configDialog)
 			configDialog = new OBSBasicSettings((QMainWindow *)obs_frontend_get_main_window());
@@ -399,19 +399,19 @@ MultistreamDock::MultistreamDock(QWidget *parent) : QFrame(parent)
 	auto contributeButton = new QPushButton;
 	contributeButton->setMinimumHeight(30);
 	contributeButton->setIcon(ConfigUtils::generateEmojiQIcon("❤️"));
-	contributeButton->setToolTip(QString::fromUtf8(obs_module_text("AitumMultistreamDonate")));
+	contributeButton->setToolTip(QString::fromUtf8(obs_module_text("WynoMultistreamDonate")));
 	QPushButton::connect(contributeButton, &QPushButton::clicked,
-			     [] { QDesktopServices::openUrl(QUrl("https://aitum.tv/contribute")); });
+			     [] { QDesktopServices::openUrl(QUrl("https://wyno.tv/contribute")); });
 	buttonRow->addWidget(contributeButton);
 
-	// Aitum Button
-	auto aitumButton = new QPushButton;
-	aitumButton->setMinimumHeight(30);
-	//aitumButton->setSizePolicy(sp2);
-	aitumButton->setIcon(QIcon(":/aitum/media/aitum.png"));
-	aitumButton->setToolTip(QString::fromUtf8("https://aitum.tv"));
-	QPushButton::connect(aitumButton, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl("https://aitum.tv")); });
-	buttonRow->addWidget(aitumButton);
+	// Wyno Button
+	auto wynoButton = new QPushButton;
+	wynoButton->setMinimumHeight(30);
+	//wynoButton->setSizePolicy(sp2);
+	wynoButton->setIcon(QIcon(":/wyno/media/wyno.png"));
+	wynoButton->setToolTip(QString::fromUtf8("https://wyno.tv"));
+	QPushButton::connect(wynoButton, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl("https://wyno.tv")); });
+	buttonRow->addWidget(wynoButton);
 
 	mainLayout->addLayout(buttonRow);
 
@@ -490,7 +490,7 @@ MultistreamDock::MultistreamDock(QWidget *parent) : QFrame(parent)
 				continue;
 			obs_output_t *output = nullptr;
 			calldata_set_string(&cd, "name", name.c_str());
-			if (proc_handler_call(ph, "aitum_vertical_get_stream_output", &cd)) {
+			if (proc_handler_call(ph, "wyno_vertical_get_stream_output", &cd)) {
 				output = (obs_output_t *)calldata_ptr(&cd, "output");
 			}
 			bool active = obs_output_active(output);
@@ -580,9 +580,9 @@ void MultistreamDock::LoadSettingsFile()
 	bfree(path);
 	if (!config) {
 		config = obs_data_create();
-		blog(LOG_WARNING, "[Aitum Multistream] No configuration file loaded");
+		blog(LOG_WARNING, "[Wyno Multistream] No configuration file loaded");
 	} else {
-		blog(LOG_INFO, "[Aitum Multistream] Loaded configuration file");
+		blog(LOG_INFO, "[Wyno Multistream] Loaded configuration file");
 	}
 	partnerBlockTime = obs_data_get_int(config, "partner_block");
 
@@ -607,7 +607,7 @@ void MultistreamDock::LoadSettingsFile()
 		current_config = obs_data_create();
 		obs_data_set_string(current_config, "name", profile);
 		bfree(profile);
-		blog(LOG_INFO, "[Aitum Multistream] profile not found");
+		blog(LOG_INFO, "[Wyno Multistream] profile not found");
 		LoadSettings();
 		return;
 	}
@@ -717,7 +717,7 @@ void MultistreamDock::LoadOutput(obs_data_t *output_data, bool vertical)
 					if (button == QMessageBox::No)
 						start = false;
 				}
-				if (!start || !proc_handler_call(ph, "aitum_vertical_start_stream_output", &cd))
+				if (!start || !proc_handler_call(ph, "wyno_vertical_start_stream_output", &cd))
 					streamButton->setChecked(false);
 			} else {
 				bool stop = true;
@@ -731,7 +731,7 @@ void MultistreamDock::LoadOutput(obs_data_t *output_data, bool vertical)
 						stop = false;
 				}
 				if (stop) {
-					proc_handler_call(ph, "aitum_vertical_stop_stream_output", &cd);
+					proc_handler_call(ph, "wyno_vertical_stop_stream_output", &cd);
 				} else {
 					streamButton->setChecked(true);
 				}
@@ -743,7 +743,7 @@ void MultistreamDock::LoadOutput(obs_data_t *output_data, bool vertical)
 	} else {
 		connect(streamButton, &QPushButton::clicked, [this, streamButton, output_data] {
 			if (streamButton->isChecked()) {
-				blog(LOG_INFO, "[Aitum Multistream] start stream clicked '%s'",
+				blog(LOG_INFO, "[Wyno Multistream] start stream clicked '%s'",
 				     obs_data_get_string(output_data, "name"));
 				if (!StartOutput(output_data, streamButton))
 					streamButton->setChecked(false);
@@ -760,7 +760,7 @@ void MultistreamDock::LoadOutput(obs_data_t *output_data, bool vertical)
 						stop = false;
 				}
 				if (stop) {
-					blog(LOG_INFO, "[Aitum Multistream] stop stream clicked '%s'",
+					blog(LOG_INFO, "[Wyno Multistream] stop stream clicked '%s'",
 					     obs_data_get_string(output_data, "name"));
 					const char *name2 = obs_data_get_string(output_data, "name");
 					for (auto it = outputs.begin(); it != outputs.end(); it++) {
@@ -822,7 +822,7 @@ void MultistreamDock::SaveSettings()
 	if (!config) {
 		ensure_directory(path);
 		config = obs_data_create();
-		blog(LOG_WARNING, "[Aitum Multistream] New configuration file");
+		blog(LOG_WARNING, "[Wyno Multistream] New configuration file");
 	}
 	obs_data_set_int(config, "partner_block", partnerBlockTime);
 	auto profiles = obs_data_get_array(config, "profiles");
@@ -859,9 +859,9 @@ void MultistreamDock::SaveSettings()
 	obs_data_release(pd);
 
 	if (obs_data_save_json_safe(config, path, "tmp", "bak")) {
-		blog(LOG_INFO, "[Aitum Multistream] Saved settings");
+		blog(LOG_INFO, "[Wyno Multistream] Saved settings");
 	} else {
-		blog(LOG_ERROR, "[Aitum Multistream] Failed saving settings");
+		blog(LOG_ERROR, "[Wyno Multistream] Failed saving settings");
 	}
 	obs_data_release(config);
 	bfree(path);
@@ -905,7 +905,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 			auto main_output = obs_frontend_get_streaming_output();
 			if (!obs_output_active(main_output)) {
 				obs_output_release(main_output);
-				blog(LOG_WARNING, "[Aitum Multistream] failed to start stream '%s' because main was not started",
+				blog(LOG_WARNING, "[Wyno Multistream] failed to start stream '%s' because main was not started",
 				     obs_data_get_string(settings, "name"));
 				QMessageBox::warning(this, QString::fromUtf8(obs_module_text("MainOutputNotActive")),
 						     QString::fromUtf8(obs_module_text("MainOutputNotActive")));
@@ -916,7 +916,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 			obs_output_release(main_output);
 			if (!venc) {
 				blog(LOG_WARNING,
-				     "[Aitum Multistream] failed to start stream '%s' because encoder index %d was not found",
+				     "[Wyno Multistream] failed to start stream '%s' because encoder index %d was not found",
 				     obs_data_get_string(settings, "name"), vei);
 				QMessageBox::warning(this, QString::fromUtf8(obs_module_text("MainOutputEncoderIndexNotFound")),
 						     QString::fromUtf8(obs_module_text("MainOutputEncoderIndexNotFound")));
@@ -930,7 +930,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 				obs_data_apply(s, ves);
 				obs_data_release(ves);
 			}
-			std::string video_encoder_name = "aitum_multi_video_encoder_";
+			std::string video_encoder_name = "wyno_multi_video_encoder_";
 			video_encoder_name += name;
 			venc = obs_video_encoder_create(venc_name, video_encoder_name.c_str(), s, nullptr);
 			obs_data_release(s);
@@ -952,7 +952,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 			auto main_output = obs_frontend_get_streaming_output();
 			if (!obs_output_active(main_output)) {
 				obs_output_release(main_output);
-				blog(LOG_WARNING, "[Aitum Multistream] failed to start stream '%s' because main was not started",
+				blog(LOG_WARNING, "[Wyno Multistream] failed to start stream '%s' because main was not started",
 				     obs_data_get_string(settings, "name"));
 				QMessageBox::warning(this, QString::fromUtf8(obs_module_text("MainOutputNotActive")),
 						     QString::fromUtf8(obs_module_text("MainOutputNotActive")));
@@ -963,7 +963,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 			obs_output_release(main_output);
 			if (!aenc) {
 				blog(LOG_WARNING,
-				     "[Aitum Multistream] failed to start stream '%s' because encoder index %d was not found",
+				     "[Wyno Multistream] failed to start stream '%s' because encoder index %d was not found",
 				     obs_data_get_string(settings, "name"), aei);
 				QMessageBox::warning(this, QString::fromUtf8(obs_module_text("MainOutputEncoderIndexNotFound")),
 						     QString::fromUtf8(obs_module_text("MainOutputEncoderIndexNotFound")));
@@ -977,7 +977,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 				obs_data_apply(s, aes);
 				obs_data_release(aes);
 			}
-			std::string audio_encoder_name = "aitum_multi_audio_encoder_";
+			std::string audio_encoder_name = "wyno_multi_audio_encoder_";
 			audio_encoder_name += name;
 			aenc = obs_audio_encoder_create(aenc_name, audio_encoder_name.c_str(), s,
 							obs_data_get_int(settings, "audio_track"), nullptr);
@@ -989,7 +989,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 		venc = main_output ? obs_output_get_video_encoder(main_output) : nullptr;
 		if (!venc || !obs_output_active(main_output)) {
 			obs_output_release(main_output);
-			blog(LOG_WARNING, "[Aitum Multistream] failed to start stream '%s' because main was not started",
+			blog(LOG_WARNING, "[Wyno Multistream] failed to start stream '%s' because main was not started",
 			     obs_data_get_string(settings, "name"));
 			QMessageBox::warning(this, QString::fromUtf8(obs_module_text("MainOutputNotActive")),
 					     QString::fromUtf8(obs_module_text("MainOutputNotActive")));
@@ -1025,7 +1025,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 	//use_auth
 	//username
 	//password
-	std::string service_name = "aitum_multi_service_";
+	std::string service_name = "wyno_multi_service_";
 	service_name += name;
 	auto service = obs_service_create(whip ? "whip_custom" : "rtmp_custom", service_name.c_str(), s, nullptr);
 	obs_data_release(s);
@@ -1039,7 +1039,7 @@ bool MultistreamDock::StartOutput(obs_data_t *settings, QPushButton *streamButto
 			type = "ffmpeg_mpegts_muxer";
 		}
 	}
-	std::string output_name = "aitum_multi_output_";
+	std::string output_name = "wyno_multi_output_";
 	output_name += name;
 	auto output = obs_output_create(type, output_name.c_str(), nullptr, nullptr);
 	obs_output_set_service(output, service);
@@ -1211,7 +1211,7 @@ void MultistreamDock::LoadVerticalOutputs(bool firstLoad)
 	auto ph = obs_get_proc_handler();
 	struct calldata cd;
 	calldata_init(&cd);
-	if (!proc_handler_call(ph, "aitum_vertical_get_stream_settings", &cd)) {
+	if (!proc_handler_call(ph, "wyno_vertical_get_stream_settings", &cd)) {
 		if (firstLoad) {                                         // only display warning on first load
 			showVerticalWarning(verticalCanvasOutputLayout); // show warning
 		}
@@ -1307,7 +1307,7 @@ void MultistreamDock::AskUpdate() {
 
 	QMessageBox mb(QMessageBox::Question, QString::fromUtf8(obs_frontend_get_locale_string("Updater.Title")),
 		       QString::fromUtf8(obs_frontend_get_locale_string("Updater.Text")) + " " +
-			       QString::fromUtf8(obs_module_text("AitumMultistream")) + " " + newer_version_available,
+			       QString::fromUtf8(obs_module_text("WynoMultistream")) + " " + newer_version_available,
 		       QMessageBox::StandardButtons(), main_window);
 	auto update = mb.addButton(QString::fromUtf8(obs_frontend_get_locale_string("Updater.UpdateNow")), QMessageBox::YesRole);
 	auto remind =
@@ -1316,15 +1316,15 @@ void MultistreamDock::AskUpdate() {
 	mb.setDefaultButton(remind);
 	mb.exec();
 	if (mb.clickedButton() == update) {
-		QDesktopServices::openUrl(QUrl(QString::fromUtf8("https://aitum.tv/download/multi/")));
+		QDesktopServices::openUrl(QUrl(QString::fromUtf8("https://wyno.tv/download/multi/")));
 	} else if (mb.clickedButton() == skip) {
 		if (!config)
 			config = obs_data_create();
 		obs_data_set_int(config, "skip_version", sv);
 		if (obs_data_save_json_safe(config, path, "tmp", "bak")) {
-			blog(LOG_INFO, "[Aitum Multistream] Saved settings");
+			blog(LOG_INFO, "[Wyno Multistream] Saved settings");
 		} else {
-			blog(LOG_ERROR, "[Aitum Multistream] Failed saving settings");
+			blog(LOG_ERROR, "[Wyno Multistream] Failed saving settings");
 		}
 	}
 	obs_data_release(config);

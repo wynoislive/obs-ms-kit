@@ -1,6 +1,6 @@
 <RCC>
-  <qresource prefix="/aitum">
-    <file>media/aitum.png</file>
+  <qresource prefix="/wyno">
+    <file>media/wyno.png</file>
     <file>media/stream.svg</file>
     <file>media/streaming.svg</file>
 	<file>media/facebook.png</file>

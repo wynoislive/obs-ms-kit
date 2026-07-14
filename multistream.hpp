@@ -54,8 +54,8 @@ private:
 
 	void AskUpdate();
 
-	QIcon streamActiveIcon = QIcon(":/aitum/media/streaming.svg");
-	QIcon streamInactiveIcon = QIcon(":/aitum/media/stream.svg");
+	QIcon streamActiveIcon = QIcon(":/wyno/media/streaming.svg");
+	QIcon streamInactiveIcon = QIcon(":/wyno/media/stream.svg");
 
 	static void frontend_event(enum obs_frontend_event event, void *private_data);
 

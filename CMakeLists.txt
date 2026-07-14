@@ -152,7 +152,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 if(BUILD_OUT_OF_TREE)
 	set_target_properties_plugin(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
 else()
-	set_target_properties_obs(${PROJECT_NAME} PROPERTIES FOLDER "plugins/aitum" PREFIX "")
+	set_target_properties_obs(${PROJECT_NAME} PROPERTIES FOLDER "plugins/wyno" PREFIX "")
 endif()
 
 # ============================================================================
@@ -176,7 +176,7 @@ message(STATUS "        Binary Destination: ${MSK_INSTALL_BIN}")
 message(STATUS "        Resource Destination: ${MSK_INSTALL_DATA}")
 
 # 2. Package the primary binary target
-install(TARGETS aitum-multistream
+install(TARGETS obs-ms-kit
     LIBRARY DESTINATION ${MSK_INSTALL_BIN}
     RUNTIME DESTINATION ${MSK_INSTALL_BIN}
     ARCHIVE DESTINATION ${MSK_INSTALL_BIN}
@@ -224,8 +224,8 @@ if(OBS_DIR)
     add_custom_target(dev-install
         # 1. Hot-deploy the updated compiled binary
         COMMAND ${CMAKE_COMMAND} -E copy 
-            $<TARGET_FILE:aitum-multistream> 
-            "${OBS_DIR}/${MSK_INSTALL_BIN}/$<TARGET_FILE_NAME:aitum-multistream>"
+            $<TARGET_FILE:obs-ms-kit> 
+            "${OBS_DIR}/${MSK_INSTALL_BIN}/$<TARGET_FILE_NAME:obs-ms-kit>"
             
         # 2. Sync active resource changes
         COMMAND ${CMAKE_COMMAND} -E copy_directory 
@@ -237,7 +237,7 @@ if(OBS_DIR)
             "${OBS_DIR}/${MSK_INSTALL_DATA}/locale"
             
         COMMENT "Hot-deploying MS-Kit binaries and UI assets to test environment: ${OBS_DIR}"
-        DEPENDS aitum-multistream
+        DEPENDS obs-ms-kit
     )
 endif()
 
