@@ -79,7 +79,7 @@ void FrameDistributor::CaptureRenderTick() {
             
             // The canvas pointer is distributed directly without VRAM texture duplication
             // Downstream nodes will capture their own localized GPU scaling passes asynchronously
-            // session->ProcessVideoFrame(canvas); 
+            session->ProcessVideoFrame(canvas); 
         }
     }
 }

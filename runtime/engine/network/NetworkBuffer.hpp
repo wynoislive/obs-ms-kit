@@ -1,6 +1,7 @@
 #pragma once
 
 #include <obs-module.h>
+#include <obs-encoder.h>
 #include <mutex>
 #include <deque>
 #include <atomic>

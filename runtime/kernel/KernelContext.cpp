@@ -1,5 +1,6 @@
 #include "KernelContext.hpp"
 #include "Scheduler.hpp"
+#include "EventDispatcher.hpp"
 #include <obs-module.h>
 
 namespace mskit::kernel {
@@ -21,9 +22,13 @@ bool KernelContext::BootKernel() {
     runtime_state = KernelRuntimeState::Initialize;
     blog(LOG_INFO, "[MSK-CORE] Initializing MS-Kit Engine Kernel Services...");
 
-    // Instantiate the priority-bucketed background worker pool
+    // Register async task execution framework
     auto task_scheduler = std::make_shared<Scheduler>(2);
     service_registry.RegisterService<IScheduler>(task_scheduler);
+
+    // Register type-safe control event bus
+    auto event_bus = std::make_shared<EventDispatcher>();
+    service_registry.RegisterService<IEventDispatcher>(event_bus);
 
     runtime_state = KernelRuntimeState::Ready;
     blog(LOG_INFO, "[MSK-CORE] MS-Kit Platform Kernel Context successfully booted.");

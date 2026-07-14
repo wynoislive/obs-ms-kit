@@ -27,6 +27,17 @@ private:
     bool TransitionTo(mskit::SessionState target_state);
     void HandleStateAction(mskit::SessionState state);
 
+    // Data-plane pipeline components
+    std::unique_ptr<class IScaler> scaler;
+    std::unique_ptr<class IEncoderInstance> encoder;
+    std::shared_ptr<class NetworkBuffer> network_buffer;
+    std::shared_ptr<class IProtocolClient> protocol_client;
+    std::unique_ptr<class ReconnectPolicy> reconnect_policy;
+    std::shared_ptr<class HealthMonitor> health_monitor;
+
+    std::mutex encoder_mutex;
+    bool is_initialized = false;
+
 public:
     OutputSession(const std::string& id, const OutputProfile& initial_profile);
     virtual ~OutputSession() override;
@@ -43,6 +54,10 @@ public:
     virtual mskit::OutputRuntimeState GetRuntimeState() const override;
     virtual const std::string& GetSessionId() const override { return session_id; }
     virtual uint32_t GetPriorityLevel() const override;
+
+    // Data Plane entry points
+    virtual void ProcessVideoFrame(obs_source_t* source) override;
+    void PipelineToBuffer(struct encoder_packet* packet);
 };
 
 } // namespace mskit::engine

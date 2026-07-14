@@ -63,6 +63,7 @@ set(KERNEL_HEADERS
   runtime/kernel/IConfigManager.hpp
   runtime/kernel/Scheduler.hpp
   runtime/kernel/KernelContext.hpp
+  runtime/kernel/EventDispatcher.hpp
 )
 
 set(ENGINE_HEADERS
@@ -101,6 +102,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   runtime/engine/protocol/RtmpClient.cpp
   runtime/kernel/Scheduler.cpp
   runtime/kernel/KernelContext.cpp
+  runtime/kernel/EventDispatcher.cpp
 	resources.qrc
 	config-dialog.hpp
 	config-utils.hpp
