@@ -1,0 +1,81 @@
+name: Build & Release Engine
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build and Package Windows x64 Release
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # 1. Setup compiler tools
+      - name: Set up MSVC Dev Cmd
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # 2. Setup Qt6 Run-times (Caching optimized)
+      - name: Install Qt6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.3'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          dir: '${{ github.workspace }}/qt'
+
+      # 3. Fetch libobs dependencies securely
+      - name: Fetch libobs Dependencies
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path deps
+          # We pull standard OBS development header mappings to resolve include interfaces during compilation
+          Invoke-WebRequest -Uri "https://github.com/obsproject/obs-studio/releases/download/30.1.2/obs-studio-30.1.2-Full-x64.zip" -OutFile deps/obs.zip
+          Expand-Archive -Path deps/obs.zip -DestinationPath deps/obs-studio
+          
+          # Inject target paths into the GitHub Environment runner space
+          echo "OBS_DEP_PATH=${{ github.workspace }}/deps/obs-studio" >> $env:GITHUB_ENV
+
+      # 4. Configure build paths
+      - name: Configure CMake
+        shell: powershell
+        run: |
+          cmake -B build_x64 -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DQt6_DIR="${{ github.workspace }}/qt/Qt/6.6.3/msvc2022_64/lib/cmake/Qt6" `
+            -Dobs-studio_DIR="${{ env.OBS_DEP_PATH }}/cmake/obs-studio" `
+            -DCMAKE_INSTALL_PREFIX=build_x64/dist
+
+      # 5. Compile the engine
+      - name: Build Target
+        run: cmake --build build_x64 --config Release --parallel
+
+      # 6. Execute the package installer script we built in Milestone 10
+      - name: Install Target
+        run: cmake --install build_x64 --config Release
+
+      # 7. Compress release directory contents safely
+      - name: Compress Release Archive
+        shell: powershell
+        run: |
+          # Zips the structured /dist folder, maintaining standard OBS folder layouts
+          Compress-Archive -Path build_x64/dist/* -DestinationPath obs-ms-kit-windows-x64.zip
+
+      # 8. Push distribution package to GitHub Releases
+      - name: Publish Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: obs-ms-kit-windows-x64.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
